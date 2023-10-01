@@ -6,7 +6,6 @@ from aiogram import F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from bs4 import BeautifulSoup
-from sdamgia import SdamGIA
 
 import assets
 import config
@@ -15,9 +14,6 @@ from bot import SolveBot
 
 class SolveStates(StatesGroup):
     test = State()
-
-
-sdam = SdamGIA()
 
 
 async def get_problem(session: aiohttp.ClientSession, url: str, problem_id: str):
@@ -74,12 +70,16 @@ async def get_problem(session: aiohttp.ClientSession, url: str, problem_id: str)
 
 @SolveBot.router.message(F.text, F.text == '🧠 Решить')
 async def on_solve_button(message: Message):
-    await message.reply_photo(assets.example, '<b>🧠 Чтобы решить вариант, отправьте ссылку боту:</b>')
+    await message.reply_photo(assets.example, '<b>🤓 Чтобы решить вариант, отправьте ссылку боту:</b>\n'
+                                              '\n'
+                                              'Например: https://oge.sdamgia.ru/test?id=54697659')
 
 
 @SolveBot.router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
 async def on_solve_url_message(message: Message, m: Match[str]):
-    response = f'<b>💎 Ваш вариант [{m.group(2)}] решён:</b>\n\n'
+    await message.reply('<b>Загрузка ответов...</b>')
+
+    response = f'<b>💎 Ваш вариант [<code>{m.group(2)}</code>] решён:</b>\n\n'
 
     index = 1
     async with aiohttp.ClientSession() as session:
@@ -96,8 +96,11 @@ async def on_solve_url_message(message: Message, m: Match[str]):
             matches = re.findall(r'comments(\d+)', text)
             for task_id in matches:
                 task = await get_problem(session, m.group(1), task_id)
-                task_solution = (f'<b>Задание номер {index} [<code>{task_id}</code>]:</b>\n'
-                                 f'\n<pre>{task["solution"]["text"]} </pre>\n\n')
+                task_solution = (f'<b><a href=\"{m.group(1)}/problem?id={task_id}\">Задание</a> номер {index}:</b>\n'
+                                 '\n'
+                                 f'<b>Решение: </b> <code>{task["solution"]["text"]}</code>\n'
+                                 f'<b>Ответ: </b> <code>{task["answer"]}</code>\n'
+                                 '\n')
                 if len(response) + len(task_solution) > 3900:
                     await message.answer(response)
                     response = ''
