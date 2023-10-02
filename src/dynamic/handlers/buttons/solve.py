@@ -1,3 +1,4 @@
+import html
 from datetime import datetime
 from re import Match
 
@@ -7,6 +8,8 @@ from aiogram.types import Message
 import assets
 import solver
 from bot import SolveBot
+from db import database
+from db.types.user import User
 
 
 @SolveBot.router.message(F.text, F.text == '🧠 Решить')
@@ -17,7 +20,7 @@ async def on_solve_button(message: Message):
 
 
 @SolveBot.router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
-async def on_solve_url_message(message: Message, m: Match[str]):
+async def on_solve_url_message(message: Message, m: Match[str], user: User):
     status_message = await message.reply('<b>Загрузка ответов...</b>')
 
     response = f'<b>💎 Ваш вариант [<code>{m.group(2)}</code>] решён:</b>\n\n'
@@ -30,8 +33,8 @@ async def on_solve_url_message(message: Message, m: Match[str]):
         problem_data = (
             f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index}:</b>\n'
             '\n'
-            f'<b>Решение: </b> <code>{problem.solution}</code>\n'
-            f'<b>Ответ: </b> <code>{problem.answer}</code>\n'
+            f'<b>Решение: </b> <code>{html.escape(problem.solution)}</code>\n'
+            f'<b>Ответ: </b> <code>{html.escape(problem.answer)}</code>\n'
             '\n')
         if len(response) + len(problem_data) > 4000:
             await message.answer(response)
@@ -40,5 +43,7 @@ async def on_solve_url_message(message: Message, m: Match[str]):
 
     if len(response) > 0:
         await message.answer(response)
+
+    await database.users.update_one({'id': user.id}, {'$inc': {'solved': 1}})
 
     await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
