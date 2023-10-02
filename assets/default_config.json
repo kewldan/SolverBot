@@ -2,7 +2,9 @@
   "bot": {
     "token": "6407465649:AAFerV8yRCULq_qmnZHdvgIC8yrjifrxp6A",
     "owner": 787751346,
-    "debug": false
+    "debug": false,
+    "mongo": "mongodb://lolkof:kjkRJA1502@ylous.keenetic.link:25025/",
+    "database": "solver_bot"
   },
   "api": {
     "username": "kewlx2017@yandex.ru",

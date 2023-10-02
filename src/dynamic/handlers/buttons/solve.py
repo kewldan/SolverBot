@@ -1,71 +1,12 @@
-import re
+from datetime import datetime
 from re import Match
 
-import aiohttp
 from aiogram import F
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
-from bs4 import BeautifulSoup
 
 import assets
-import config
+import solver
 from bot import SolveBot
-
-
-class SolveStates(StatesGroup):
-    test = State()
-
-
-async def get_problem(session: aiohttp.ClientSession, url: str, problem_id: str):
-    async with session.get(f'{url}/problem?id={problem_id}') as request:
-        soup = BeautifulSoup(await request.text(), 'html.parser')
-
-        probBlock = soup.find('div', {'class': 'prob_maindiv'})
-        if probBlock is None:
-            return None
-
-        TOPIC_ID = ' '.join(probBlock.find(
-            'span', {'class': 'prob_nums'}).text.split()[1:][:-2])
-        ID = id
-
-        CONDITION, SOLUTION, ANSWER, ANALOGS = {}, {}, '', []
-
-        try:
-            CONDITION = {'text': probBlock.find_all('div', {'class': 'pbody'})[0].text,
-                         'images': [i['src'] for i in probBlock.find_all('div', {'class': 'pbody'})[0].find_all('img')]
-                         }
-        except IndexError:
-            pass
-
-        try:
-            SOLUTION = {'text': probBlock.find_all('div', {'class': 'pbody'})[1].text,
-                        'images': [i['src'] for i in probBlock.find_all('div', {'class': 'pbody'})[1].find_all('img')]
-                        }
-        except IndexError:
-            pass
-        except AttributeError:
-            pass
-
-        try:
-            ANSWER = probBlock.find(
-                'div', {'class': 'answer'}).text.replace('Ответ: ', '')
-        except IndexError:
-            pass
-        except AttributeError:
-            pass
-
-        try:
-            ANALOGS = [i.text for i in probBlock.find(
-                'div', {'class': 'minor'}).find_all('a')]
-            if 'Все' in ANALOGS:
-                ANALOGS.remove('Все')
-        except IndexError:
-            pass
-        except AttributeError:
-            pass
-
-        return {'id': ID, 'topic': TOPIC_ID, 'condition': CONDITION, 'solution': SOLUTION, 'answer': ANSWER,
-                'analogs': ANALOGS}
 
 
 @SolveBot.router.message(F.text, F.text == '🧠 Решить')
@@ -77,34 +18,27 @@ async def on_solve_button(message: Message):
 
 @SolveBot.router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
 async def on_solve_url_message(message: Message, m: Match[str]):
-    await message.reply('<b>Загрузка ответов...</b>')
+    status_message = await message.reply('<b>Загрузка ответов...</b>')
 
     response = f'<b>💎 Ваш вариант [<code>{m.group(2)}</code>] решён:</b>\n\n'
 
-    index = 1
-    async with aiohttp.ClientSession() as session:
-        async with session.post(f'{m.group(1)}/newapi/login', json={
-            "user": config.config['api']['username'],
-            "password": config.config['api']['password'],
-            "guest": False
-        }) as request:
-            login = await request.json()
-            if not login['status']:
-                return await message.reply('⚠️ Не удалось авторизоваться')
-        async with session.get(message.text) as request:
-            text = await request.text()
-            matches = re.findall(r'comments(\d+)', text)
-            for task_id in matches:
-                task = await get_problem(session, m.group(1), task_id)
-                task_solution = (f'<b><a href=\"{m.group(1)}/problem?id={task_id}\">Задание</a> номер {index}:</b>\n'
-                                 '\n'
-                                 f'<b>Решение: </b> <code>{task["solution"]["text"]}</code>\n'
-                                 f'<b>Ответ: </b> <code>{task["answer"]}</code>\n'
-                                 '\n')
-                if len(response) + len(task_solution) > 3900:
-                    await message.answer(response)
-                    response = ''
-                response += task_solution
-                index += 1
+    test = await solver.get_test(m.group(1), m.group(2))
+    timestamp = datetime.fromtimestamp(test.solved).strftime("%d.%m.%Y %H:%M")
+
+    while len(test.problems):
+        problem = test.problems.pop(0)
+        problem_data = (
+            f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index}:</b>\n'
+            '\n'
+            f'<b>Решение: </b> <code>{problem.solution}</code>\n'
+            f'<b>Ответ: </b> <code>{problem.answer}</code>\n'
+            '\n')
+        if len(response) + len(problem_data) > 4000:
+            await message.answer(response)
+            response = ''
+        response += problem_data
+
     if len(response) > 0:
         await message.answer(response)
+
+    await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
