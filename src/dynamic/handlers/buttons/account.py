@@ -18,9 +18,8 @@ async def on_account_view_callback(message: Union[types.Message, types.CallbackQ
     joined = datetime.fromtimestamp(user.joined).strftime("%d.%m.%Y %H:%M")
 
     await func(
-        text=f'Аккаунт @{user.username}\n'
+        text=f'Аккаунт @{user.username if user.username else "none"}\n'
              f'\n'
              f'🆔 ID: <code>{user.id}</code>\n\n'
              f'📅 Дата регистрации: <code>{joined}</code>\n'
-             f'✅ Решено вариантов: <code>{user.solved}</code>\n'
-             f'💵 Баланс: <code>0₽</code>')
+             f'✅ Решено вариантов: <code>{user.solved}</code>')

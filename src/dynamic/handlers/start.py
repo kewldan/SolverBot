@@ -23,6 +23,8 @@ def get_keyboard(user_id: int):
 @SolveBot.router.message(CommandStart())
 async def on_start_command(message: Message):
     await message.answer_photo(assets.header, '🧑‍🎓 Спасибо, что пользуетесь ботом!\n'
+                                              'Бот полностью бесплатный 🤑\n'
+                                              '\n'
                                               f'Ваш ID в системе - <code>{message.from_user.id}</code>\n\n'
-                                              f'Обратная связь @kewldan, донаты туда же 😋',
+                                              f'Обратная связь @kewldan, благодарности туда же 😋',
                                reply_markup=get_keyboard(message.from_user.id))
