@@ -36,7 +36,7 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
             f'<b>Решение: </b> <code>{html.escape(problem.solution)}</code>\n'
             f'<b>Ответ: </b> <code>{html.escape(problem.answer)}</code>\n'
             '\n')
-        if len(response) + len(problem_data) > 4000:
+        if len(response) + len(problem_data) > 3600:
             await message.answer(response)
             response = ''
         response += problem_data
