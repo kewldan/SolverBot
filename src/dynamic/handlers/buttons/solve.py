@@ -34,12 +34,15 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
             f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index}:</b>\n'
             '\n'
             f'<b>Решение: </b> <code>{html.escape(problem.solution)}</code>\n'
-            f'<b>Ответ: </b> <code>{html.escape(problem.answer)}</code>\n'
+            + (f'<b>Ответ: </b> <code>{html.escape(problem.answer)}</code>\n' if len(problem.answer) > 0 else '') +
             '\n')
-        if len(response) + len(problem_data) > 3600:
+        if len(problem_data) > 4000:
+            response += f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index} слишком длинное</b>\n'
+        if len(response) + len(problem_data) > 4000: # If next problem will overflow response flush it
             await message.answer(response)
             response = ''
-        response += problem_data
+        if len(problem_data) <= 4000:
+            response += problem_data
 
     if len(response) > 0:
         await message.answer(response)
