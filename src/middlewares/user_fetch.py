@@ -14,7 +14,8 @@ class UserFetchMiddleware(BaseMiddleware):
         user = User(**await database.get_user(event.from_user.id, event.from_user.username))
 
         if user.username != event.from_user.username:
-            await database.users.update_one({'id': event.from_user.id}, {'$set': {'username': event.from_user.username}})
+            await database.users.update_one({'id': event.from_user.id},
+                                            {'$set': {'username': event.from_user.username}})
 
         data['user'] = user
 

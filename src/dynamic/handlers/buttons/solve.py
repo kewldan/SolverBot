@@ -23,22 +23,28 @@ async def on_solve_button(message: Message):
 async def on_solve_url_message(message: Message, m: Match[str], user: User):
     status_message = await message.reply('<b>Загрузка ответов...</b>')
 
-    response = f'<b>💎 Ваш вариант [<code>{m.group(2)}</code>] решён:</b>\n\n'
+    response = f'<b>💎 Ваш <a href=\"{m.group(0)}\">вариант</a> [<code>{m.group(2)}</code>] решён:</b>\n\n'
 
     test = await solver.get_test(m.group(1), m.group(2))
     timestamp = datetime.fromtimestamp(test.solved).strftime("%d.%m.%Y %H:%M")
+    answers_text = f'<b>🥰 Краткие ответы на <a href=\"{m.group(0)}\">вариант</a>: </b>\n\n'
 
     while len(test.problems):
         problem = test.problems.pop(0)
         problem_data = (
-            f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index}:</b>\n'
-            '\n'
-            f'<b>Решение: </b> <code>{html.escape(problem.solution)}</code>\n'
-            + (f'<b>Ответ: </b> <code>{html.escape(problem.answer)}</code>\n' if len(problem.answer) > 0 else '') +
-            '\n')
+                f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index}:</b>\n'
+                '\n'
+                f'<b>Решение: </b> <code>{html.escape(problem.solution)}</code>\n'
+                + (f'<b>Ответ: </b> <code>{html.escape(problem.answer)}</code>\n' if len(problem.answer) > 0 else '') +
+                '\n')
+
+        if len(problem.answer):
+            answers_text += (f'<a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание {problem.index}</a>: '
+                             f'<code>{html.escape(problem.answer)}</code>\n')
+
         if len(problem_data) > 4000:
             response += f'<b><a href=\"{m.group(1)}/problem?id={problem.problem_id}\">Задание</a> номер {problem.index} слишком длинное</b>\n'
-        if len(response) + len(problem_data) > 4000: # If next problem will overflow response flush it
+        if len(response) + len(problem_data) > 4000:  # If next problem will overflow response flush it
             await message.answer(response)
             response = ''
         if len(problem_data) <= 4000:
@@ -46,6 +52,8 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
 
     if len(response) > 0:
         await message.answer(response)
+
+    await message.answer(answers_text)
 
     await database.users.update_one({'id': user.id}, {'$inc': {'solved': 1}})
 
