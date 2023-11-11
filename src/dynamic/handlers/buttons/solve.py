@@ -6,6 +6,7 @@ from aiogram import F
 from aiogram.types import Message
 
 import assets
+import config
 import solver
 from bot import SolveBot
 from db import database
@@ -58,3 +59,8 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
     await database.users.update_one({'id': user.id}, {'$inc': {'solved': 1}})
 
     await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
+
+    await SolveBot.instance.send_message(config.config['bot']['owner'],
+                                         f'<a href=\"{message.from_user.url}\">Пользователь</a> решил '
+                                         f'<a href=\"{m.group(0)}\">вариант</a> | '
+                                         f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')

@@ -23,6 +23,7 @@ class ProblemData(BaseModel):
 class TestData(BaseModel):
     solved: int
     problems: list[ProblemData]
+    loaded: bool
 
     async def save(self, path: str):
         async with aiofiles.open(path, 'w', encoding='utf-8') as f:
@@ -39,12 +40,13 @@ async def get_test(hostname: str, test_id: str) -> TestData:
     if not os.path.exists(path):
         problems = await solve(hostname, test_id)
         solved = math.floor(time.time())
-        test = TestData(problems=problems, solved=solved)
+        test = TestData(problems=problems, solved=solved, loaded=False)
         await test.save(path)
     else:
         async with aiofiles.open(path, 'r', encoding='utf-8') as f:
             read = await f.read()
             json_read = json.loads(read)
+            json_read['loaded'] = True
             test = TestData(**json_read)
     return test
 
