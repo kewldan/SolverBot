@@ -61,6 +61,7 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
     await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
 
     await SolveBot.instance.send_message(config.config['bot']['owner'],
-                                         f'<a href=\"{message.from_user.url}\">Пользователь</a> решил '
+                                         f'<a href=\"{message.from_user.url}\">Пользователь</a> '
+                                         f'решил свой {user.solved} '
                                          f'<a href=\"{m.group(0)}\">вариант</a> | '
                                          f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
