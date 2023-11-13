@@ -15,7 +15,7 @@ async def on_account_view_callback(message: Union[types.Message, types.CallbackQ
     else:
         func = message.message.edit_text
 
-    joined = datetime.fromtimestamp(user.joined).strftime("%d.%m.%Y %H:%M")
+    joined = datetime.fromtimestamp(user.joined * 3600 * 3).strftime("%d.%m.%Y %H:%M")
 
     await func(
         text=f'Аккаунт @{user.username if user.username else "none"}\n'
