@@ -1,3 +1,4 @@
+import datetime
 import json
 import math
 import os
@@ -39,7 +40,7 @@ async def get_test(hostname: str, test_id: str) -> TestData:
 
     if not os.path.exists(path):
         problems = await solve(hostname, test_id)
-        solved = math.floor(time.time())
+        solved = math.floor(time.mktime(datetime.datetime.now().timetuple()))
         test = TestData(problems=problems, solved=solved, loaded=False)
         await test.save(path)
     else:
