@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union
 
 from aiogram import types
@@ -19,3 +20,7 @@ async def confirm_action(data: Union[types.Message, types.CallbackQuery], descri
     await func(
         f'Вы уверены, что хотите {description}?' + ('\n\n⚠️ Это действие необратимо' if warning else ''),
         reply_markup=builder.as_markup())
+
+
+def get_timestamp(time: int) -> str:
+    return datetime.fromtimestamp(time + 3600 * 3).strftime("%d.%m.%Y %H:%M")

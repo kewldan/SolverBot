@@ -11,6 +11,9 @@ async def on_management_button(message: Message):
     builder = InlineKeyboardBuilder()
 
     builder.button(text='📢 Рассылка', callback_data='distribute')
+    builder.button(text='🧑‍🎓 Пользователи', callback_data='users')
+
+    builder.adjust(1, repeat=True)
 
     if type(message) is Message:
         func = message.answer

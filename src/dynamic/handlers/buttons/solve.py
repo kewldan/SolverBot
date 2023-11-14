@@ -1,5 +1,4 @@
 import html
-from datetime import datetime
 from re import Match
 
 from aiogram import F
@@ -11,6 +10,7 @@ import solver
 from bot import SolveBot
 from db import database
 from db.types.user import User
+from utils import get_timestamp
 
 
 @SolveBot.router.message(F.text, F.text == '🧠 Решить')
@@ -27,7 +27,7 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
     response = f'<b>💎 Ваш <a href=\"{m.group(0)}\">вариант</a> [<code>{m.group(2)}</code>] решён:</b>\n\n'
 
     test = await solver.get_test(m.group(1), m.group(2))
-    timestamp = datetime.fromtimestamp(test.solved + 3600 * 3).strftime("%d.%m.%Y %H:%M")
+    timestamp = get_timestamp(test.solved)
     answers_text = f'<b>🥰 Краткие ответы на <a href=\"{m.group(0)}\">вариант</a>: </b>\n\n'
 
     while len(test.problems):

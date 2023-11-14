@@ -1,10 +1,10 @@
-from datetime import datetime
 from typing import Union
 
 from aiogram import F, types
 
 from bot import SolveBot
 from db.types.user import User
+from utils import get_timestamp
 
 
 @SolveBot.router.callback_query(F.data == 'account')
@@ -15,7 +15,7 @@ async def on_account_view_callback(message: Union[types.Message, types.CallbackQ
     else:
         func = message.message.edit_text
 
-    joined = datetime.fromtimestamp(user.joined * 3600 * 3).strftime("%d.%m.%Y %H:%M")
+    joined = get_timestamp(user.joined)
 
     await func(
         text=f'Аккаунт @{user.username if user.username else "none"}\n'
