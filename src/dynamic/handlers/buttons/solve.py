@@ -2,6 +2,7 @@ import html
 from re import Match
 
 from aiogram import F
+from aiogram.exceptions import AiogramError
 from aiogram.types import Message
 
 import config
@@ -14,7 +15,7 @@ from utils import get_timestamp
 
 @SolveBot.router.message(F.text, F.text == '🧠 Решить')
 async def on_solve_button(message: Message):
-    await message.answer('<b>🤓 Чтобы решить вариант, отправьте ссылку боту на вариант</b>\n'
+    await message.answer('<b>🤔 Чтобы решить вариант, отправьте ссылку боту сообщением</b>\n'
                          '\n'
                          'Например: https://oge.sdamgia.ru/test?id=54697659')
 
@@ -61,10 +62,13 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
     await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
 
     for owner in config.config['bot']['owners']:
-        await SolveBot.instance.send_message(owner,
-                                             f'<a href=\"{message.from_user.url}\">Пользователь</a> '
-                                             f'(<code>{message.from_user.username}</code>) '
-                                             f'[<code>{message.from_user.id}</code>] '
-                                             f'решил свой {user.solved} '
-                                             f'<a href=\"{m.group(0)}\">вариант</a> | '
-                                             f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
+        try:
+            await SolveBot.instance.send_message(owner,
+                                                 f'<a href=\"{message.from_user.url}\">Пользователь</a> '
+                                                 f'(<code>{message.from_user.username}</code>) '
+                                                 f'[<code>{message.from_user.id}</code>] '
+                                                 f'решил свой {user.solved} '
+                                                 f'<a href=\"{m.group(0)}\">вариант</a> | '
+                                                 f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
+        except AiogramError:
+            pass

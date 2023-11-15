@@ -24,7 +24,7 @@ def get_keyboard(user_id: int):
 async def on_start_command(message: Message):
     await message.answer_photo(assets.header, '👋 Привет, это бот для решения вариантов с сайта Сдам ГИА, '
                                               'полностью бесплатный и без рекламы. Бот создавался на некоммерческой '
-                                              'основе. Всем спасибо за использование и активность! 💖\n'
+                                              'основе. Всем спасибо за использование и активность!\n'
                                               '\n'
                                               f'Обратная связь: /support',
                                reply_markup=get_keyboard(message.from_user.id))
