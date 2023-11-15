@@ -16,7 +16,7 @@ class DistributeStates(StatesGroup):
     message = State()
 
 
-@SolveBot.router.callback_query(F.data == 'distribute_confirm', F.from_user.id == config['bot']['owner'])
+@SolveBot.router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(config['bot']['owners']))
 async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     max_count = await database.users.count_documents({})
@@ -33,7 +33,7 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
     await state.clear()
 
 
-@SolveBot.router.message(StateFilter(DistributeStates.message), F.from_user.id == config['bot']['owner'])
+@SolveBot.router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(config['bot']['owners']))
 async def on_distribute_message(message: Message, state: FSMContext):
     count = await database.users.count_documents({})
 

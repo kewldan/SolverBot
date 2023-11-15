@@ -11,8 +11,8 @@ def get_keyboard(user_id: int):
     builder = ReplyKeyboardBuilder()
 
     builder.button(text='🧠 Решить')
-    builder.button(text='⚙️ Аккаунт')
-    if user_id == config.config['bot']['owner']:
+    builder.button(text='📊 Статистика')
+    if user_id in config.config['bot']['owners']:
         builder.button(text='💻 Администрирование')
 
     builder.adjust(2, 1)
@@ -22,9 +22,9 @@ def get_keyboard(user_id: int):
 
 @SolveBot.router.message(CommandStart())
 async def on_start_command(message: Message):
-    await message.answer_photo(assets.header, '🧑‍🎓 Спасибо, что пользуетесь ботом!\n'
-                                              'Бот полностью бесплатный 🤑\n'
+    await message.answer_photo(assets.header, '👋 Привет, это бот для решения вариантов с сайта Сдам ГИА, '
+                                              'полностью бесплатный и без рекламы. Бот создавался на некоммерческой '
+                                              'основе. Всем спасибо за использование и активность! 💖\n'
                                               '\n'
-                                              f'Ваш ID в системе - <code>{message.from_user.id}</code>\n\n'
-                                              f'Обратная связь @kewldan, благодарности туда же 😋',
+                                              f'Обратная связь: /support',
                                reply_markup=get_keyboard(message.from_user.id))

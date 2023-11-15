@@ -7,9 +7,9 @@ from db.types.user import User
 from utils import get_timestamp
 
 
-@SolveBot.router.callback_query(F.data == 'account')
-@SolveBot.router.message(F.text == '⚙️ Аккаунт')
-async def on_account_view_callback(message: Union[types.Message, types.CallbackQuery], user: User):
+@SolveBot.router.callback_query(F.data == 'statistics')
+@SolveBot.router.message(F.text == '📊 Статистика')
+async def on_statistics_callback(message: Union[types.Message, types.CallbackQuery], user: User):
     if type(message) is types.Message:
         func = message.answer
     else:
@@ -18,8 +18,10 @@ async def on_account_view_callback(message: Union[types.Message, types.CallbackQ
     joined = get_timestamp(user.joined)
 
     await func(
-        text=f'Аккаунт @{user.username if user.username else "none"}\n'
+        text=f'Статистика @{user.username if user.username else "none"}\n'
              f'\n'
              f'🆔 ID: <code>{user.id}</code>\n\n'
              f'📅 Дата регистрации: <code>{joined}</code>\n'
-             f'✅ Решено вариантов: <code>{user.solved}</code>')
+             f'✅ Решено вариантов: <code>{user.solved}</code>\n'
+             '\n'
+             f'Обратная связь: /support')

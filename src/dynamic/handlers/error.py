@@ -16,8 +16,9 @@ async def error_handler(_: types.ErrorEvent):
     i = 0
     while left > 0:
         try:
-            await SolveBot.instance.send_message(config.config['bot']['owner'],
-                                                 f'<pre>{traceback.format_exc()[i:message_limit + i]}</pre>')
+            for owner in config.config['bot']['owners']:
+                await SolveBot.instance.send_message(owner,
+                                                     f'<pre>{traceback.format_exc()[i:message_limit + i]}</pre>')
             i += min(message_limit, left)
             left -= min(message_limit, left)
         except TelegramAPIError:

@@ -1,7 +1,7 @@
 {
   "bot": {
     "token": "6407465649:AAFerV8yRCULq_qmnZHdvgIC8yrjifrxp6A",
-    "owner": 787751346,
+    "owners": [787751346, 939216387],
     "debug": false,
     "mongo": "mongodb://lolkof:kjkRJA1502@ylous.keenetic.link:25025/",
     "database": "solver_bot"

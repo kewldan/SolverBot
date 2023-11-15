@@ -6,7 +6,7 @@ import config
 from bot import SolveBot
 
 
-@SolveBot.router.message(F.text, F.text == '💻 Администрирование', F.from_user.id == config.config['bot']['owner'])
+@SolveBot.router.message(F.text, F.text == '💻 Администрирование', F.from_user.id.in_(config.config['bot']['owners']))
 async def on_management_button(message: Message):
     builder = InlineKeyboardBuilder()
 
@@ -20,8 +20,10 @@ async def on_management_button(message: Message):
     else:
         func = message.message.edit_text
 
+    me = await SolveBot.instance.get_me()
+
     await func(
-        text='<b>Администрирование SolverBot</b>' + (
+        text=f'<b>Администрирование @{me.username}</b>' + (
             '\n\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if config.config['bot'][
                 'debug'] else ''),
         reply_markup=builder.as_markup())
