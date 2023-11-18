@@ -5,6 +5,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import assets
 import config
 from bot import SolveBot
+from db.database import capture_referral
+from db.types.user import User
 
 
 def get_keyboard(user_id: int):
@@ -21,7 +23,11 @@ def get_keyboard(user_id: int):
 
 
 @SolveBot.router.message(CommandStart())
-async def on_start_command(message: Message):
+async def on_start_command(message: Message, user: User):
+    if not user.referral:
+        arguments = message.text.split()[1:]
+        if len(arguments) > 0:
+            await capture_referral(user.id, arguments[0])
     await message.answer_photo(assets.header, '👋 Привет, это бот для решения вариантов с сайта Сдам ГИА, '
                                               'полностью бесплатный и без рекламы. Бот создавался на некоммерческой '
                                               'основе. Всем спасибо за использование и активность!\n'

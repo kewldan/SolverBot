@@ -15,8 +15,8 @@ async def on_distribute_callback(query: CallbackQuery):
     async for user in users.find():
         user = User(**user)
         users_response.append(
-            f'{len(users_response) + 1}. {user.username} [<code>{user.id}</code>] - решено '
-            f'<code>{user.solved}</code> {get_timestamp(user.joined)}')
+            f'{len(users_response) + 1}. @{user.username} [<code>{user.id}</code>] - решено '
+            f'<code>{user.solved}</code> {get_timestamp(user.joined)} <- {user.referral}')
 
     response = "\n".join(users_response)
     await query.message.edit_text(f'<b>Пользователи ({len(users_response)}):</b>\n\n{response}')

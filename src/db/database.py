@@ -21,3 +21,11 @@ async def get_user(user_id: int, username: str):
         })
         user = await users.find_one({'id': user_id})
     return user
+
+
+async def capture_referral(user_id: int, referral: str):
+    await users.update_one({'id': user_id}, {
+        '$set': {
+            'referral': referral
+        }
+    })

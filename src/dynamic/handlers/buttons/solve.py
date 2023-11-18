@@ -67,7 +67,7 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
                                                  f'<a href=\"{message.from_user.url}\">Пользователь</a> '
                                                  f'(<code>{message.from_user.username}</code>) '
                                                  f'[<code>{message.from_user.id}</code>] '
-                                                 f'решил свой {user.solved} '
+                                                 f'решил свой {user.solved + 1} '
                                                  f'<a href=\"{m.group(0)}\">вариант</a> | '
                                                  f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
         except AiogramError:

@@ -8,3 +8,4 @@ class User(BaseModel):
     username: Optional[str] = None
     solved: int
     joined: int
+    referral: Optional[str] = None
