@@ -17,7 +17,7 @@ async def on_distribute_callback(query: CallbackQuery):
     async for user in users.find():
         user = User(**user)
         users_response.append(
-            f'{len(users_response) + 1}. {html.escape(("@" + user.username) if user.username else "🤔")} [<code>{user.id}</code>] - решено '
+            f'<b>{len(users_response) + 1}.</b> {html.escape(("@" + user.username) if user.username else "")} [<code>{user.id}</code>] - '
             f'<code>{user.solved}</code> | {get_timestamp(user.joined)}'
             f'{html.escape((" через " + user.referral) if user.referral else "")}')
 
