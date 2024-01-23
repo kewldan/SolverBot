@@ -94,7 +94,7 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                             except AttributeError:
                                 pass
 
-                            messages.append(ProblemData(index=index, solution=solution["text"], answer=answer,
+                            messages.append(ProblemData(index=index, solution=solution["text"] if 'text' in solution else 'Нет решения', answer=answer,
                                                         problem_id=problem_id))
                             index += 1
                     return messages
