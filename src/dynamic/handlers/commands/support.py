@@ -9,8 +9,8 @@ from bot import SolveBot
 async def on_support_command(message: Message):
     builder = InlineKeyboardBuilder()
 
-    builder.button(url='https://kewldan.vercel.app/', text='🧑‍💻 Разработчик')
-    builder.button(url='https://t.me/kwld_solver_manager', text='🦸 Поддержка')
+    builder.button(url='https://kewldan.ru/', text='🧑‍💻 Разработчик')
+    builder.button(url='https://t.me/kwld_manager', text='🦸 Поддержка')
 
     builder.adjust(1, repeat=True)
 

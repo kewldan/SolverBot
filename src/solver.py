@@ -70,16 +70,16 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                         async with session.get(f'{hostname}/problem?id={problem_id}') as problem_request:
                             soup = BeautifulSoup(await problem_request.text(), 'html.parser')
 
-                            probBlock = soup.find('div', {'class': 'prob_maindiv'})
-                            if probBlock is None:
+                            prob_block = soup.find('div', {'class': 'prob_maindiv'})
+                            if prob_block is None:
                                 return None
 
                             solution, answer = {}, ''
 
                             try:
-                                solution = {'text': probBlock.find_all('div', {'class': 'pbody'})[1].text,
+                                solution = {'text': prob_block.find_all('div', {'class': 'pbody'})[1].text,
                                             'images': [i['src'] for i in
-                                                       probBlock.find_all('div', {'class': 'pbody'})[1].find_all('img')]
+                                                       prob_block.find_all('div', {'class': 'pbody'})[1].find_all('img')]
                                             }
                             except IndexError:
                                 pass
@@ -87,7 +87,7 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                                 pass
 
                             try:
-                                answer = probBlock.find(
+                                answer = prob_block.find(
                                     'div', {'class': 'answer'}).text.replace('Ответ: ', '')
                             except IndexError:
                                 pass
