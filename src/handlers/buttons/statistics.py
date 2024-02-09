@@ -1,14 +1,15 @@
 from typing import Union
 
-from aiogram import F, types
+from aiogram import F, types, Router
+from kwldn_bot.utils import get_timestamp
 
-from bot import SolveBot
 from db.types.user import User
-from utils import get_timestamp
+
+statistics_router = Router()
 
 
-@SolveBot.router.callback_query(F.data == 'statistics')
-@SolveBot.router.message(F.text == '📊 Статистика')
+@statistics_router.callback_query(F.data == 'statistics')
+@statistics_router.message(F.text == '📊 Статистика')
 async def on_statistics_callback(message: Union[types.Message, types.CallbackQuery], user: User):
     if type(message) is types.Message:
         func = message.answer

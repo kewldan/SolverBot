@@ -1,12 +1,13 @@
-from aiogram import F
+from aiogram import F, Router
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import config
-from bot import SolveBot
+import api
+
+management_router = Router()
 
 
-@SolveBot.router.message(F.text, F.text == '💻 Администрирование', F.from_user.id.in_(config.config['bot']['owners']))
+@management_router.message(F.text, F.text == '💻 Администрирование', F.from_user.id.in_(api.config.bot.owners))
 async def on_management_button(message: Message):
     builder = InlineKeyboardBuilder()
 
@@ -20,10 +21,9 @@ async def on_management_button(message: Message):
     else:
         func = message.message.edit_text
 
-    me = await SolveBot.instance.get_me()
+    me = await message.bot.get_me()
 
     await func(
         text=f'<b>Администрирование @{me.username}</b>' + (
-            '\n\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if config.config['bot'][
-                'debug'] else ''),
+            '\n\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if api.config.bot.debug else ''),
         reply_markup=builder.as_markup())

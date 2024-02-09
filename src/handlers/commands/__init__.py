@@ -1,0 +1,10 @@
+from aiogram import Router
+
+from handlers.commands.solve import solve_router
+from handlers.commands.start import start_router
+from handlers.commands.support import support_router
+
+commands_router = Router()
+commands_router.include_router(start_router)
+commands_router.include_router(support_router)
+commands_router.include_router(solve_router)

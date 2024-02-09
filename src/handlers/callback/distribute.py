@@ -1,22 +1,23 @@
-from aiogram import F
+from aiogram import F, Router
 from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
+from kwldn_bot.modules.state_clear import get_state_clear_markup
+from kwldn_bot.utils import confirm_action
 
-import utils
-from bot import SolveBot
-from config import config
+import api
 from db import database
-from dynamic.handlers.callback.state_clear import get_state_clear_markup
+
+distribute_router = Router()
 
 
 class DistributeStates(StatesGroup):
     message = State()
 
 
-@SolveBot.router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(config['bot']['owners']))
+@distribute_router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(api.config.bot.owners))
 async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     max_count = await database.users.count_documents({})
@@ -24,7 +25,7 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
     count = 0
     async for user in database.users.find():
         try:
-            await SolveBot.instance.copy_message(user['id'], query.from_user.id, data['message'])
+            await query.bot.copy_message(user['id'], query.from_user.id, data['message'])
             count += 1
         except TelegramAPIError:
             pass
@@ -33,17 +34,17 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
     await state.clear()
 
 
-@SolveBot.router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(config['bot']['owners']))
+@distribute_router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(api.config.bot.owners))
 async def on_distribute_message(message: Message, state: FSMContext):
     count = await database.users.count_documents({})
 
-    await utils.confirm_action(message, f'разослать это сообщение {count} пользователям', True, 'distribute_confirm')
+    await confirm_action(message, f'разослать это сообщение {count} пользователям', True, 'distribute_confirm')
 
     await state.set_data({'message': message.message_id})
     await state.set_state()
 
 
-@SolveBot.router.callback_query(F.data == 'distribute')
+@distribute_router.callback_query(F.data == 'distribute')
 async def on_distribute_callback(query: CallbackQuery, state: FSMContext):
     await state.set_state(DistributeStates.message)
 

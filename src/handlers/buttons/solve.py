@@ -1,26 +1,27 @@
 import html
 from re import Match
 
-from aiogram import F
+from aiogram import F, Router
 from aiogram.exceptions import AiogramError
 from aiogram.types import Message
+from kwldn_bot.utils import get_timestamp
 
-import config
+import api
 import solver
-from bot import SolveBot
 from db import database
 from db.types.user import User
-from utils import get_timestamp
+
+solve_router = Router()
 
 
-@SolveBot.router.message(F.text, F.text == '🧠 Решить')
+@solve_router.message(F.text, F.text == '🧠 Решить')
 async def on_solve_button(message: Message):
     await message.answer('<b>🤔 Чтобы решить вариант, отправьте ссылку боту сообщением</b>\n'
                          '\n'
                          'Например: https://oge.sdamgia.ru/test?id=54697659')
 
 
-@SolveBot.router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
+@solve_router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
 async def on_solve_url_message(message: Message, m: Match[str], user: User):
     status_message = await message.reply('<b>Загрузка ответов...</b>')
 
@@ -61,14 +62,14 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
 
     await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
 
-    for owner in config.config['bot']['owners']:
+    for owner in api.config.bot.owners:
         try:
-            await SolveBot.instance.send_message(owner,
-                                                 f'<a href=\"{message.from_user.url}\">Пользователь</a> '
-                                                 f'(<code>{message.from_user.username}</code>) '
-                                                 f'[<code>{message.from_user.id}</code>] '
-                                                 f'решил свой {user.solved + 1} '
-                                                 f'<a href=\"{m.group(0)}\">вариант</a> | '
-                                                 f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
+            await message.bot.send_message(owner,
+                                           f'<a href=\"{message.from_user.url}\">Пользователь</a> '
+                                           f'(<code>{message.from_user.username}</code>) '
+                                           f'[<code>{message.from_user.id}</code>] '
+                                           f'решил свой {user.solved + 1} '
+                                           f'<a href=\"{m.group(0)}\">вариант</a> | '
+                                           f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
         except AiogramError:
             pass

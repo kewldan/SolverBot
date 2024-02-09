@@ -1,22 +1,16 @@
-from aiogram import Dispatcher, Bot, Router
-from aiogram.enums import ParseMode
+from kwldn_bot import XBot
 
-import config
+import api
+from handlers.buttons import buttons_router
+from handlers.callback import callbacks_router
+from handlers.commands import commands_router
 from middlewares.user_fetch import UserFetchMiddleware
 
+bot = XBot(api.config.bot.token)
 
-class SolveBot(Bot):
-    router = Router()
-    instance: Bot
+bot.router.message.middleware(UserFetchMiddleware())
+bot.router.callback_query.middleware(UserFetchMiddleware())
 
-    def __init__(self):
-        super().__init__(config.config['bot']['token'], parse_mode=ParseMode.HTML)
-        self.dp = Dispatcher()
-        self.dp.include_router(SolveBot.router)
-
-        SolveBot.router.message.middleware(UserFetchMiddleware())
-        SolveBot.router.callback_query.middleware(UserFetchMiddleware())
-        SolveBot.instance = self
-
-    async def start(self):
-        await self.dp.start_polling(self)
+bot.router.include_router(commands_router)
+bot.router.include_router(callbacks_router)
+bot.router.include_router(buttons_router)

@@ -1,16 +1,16 @@
 import html
 
-from aiogram import F
+from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
-from bot import SolveBot
-from config import config
+import api
 from db.database import users
 from db.types.user import User
-from utils import get_timestamp
+
+users_router = Router()
 
 
-@SolveBot.router.callback_query(F.data == 'users', F.from_user.id.in_(config['bot']['owners']))
+@users_router.callback_query(F.data == 'users', F.from_user.id.in_(api.config.bot.owners))
 async def on_distribute_callback(query: CallbackQuery):
     users_response = []
 

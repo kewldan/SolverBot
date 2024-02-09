@@ -1,16 +1,12 @@
 import asyncio
 import logging
 
-import loader
-from bot import SolveBot
+from bot import bot
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 async def main():
-    logging.basicConfig(level=logging.DEBUG)
-
-    bot = SolveBot()
-    loader.load_dynamics('dynamic')
-
     await bot.start()
 
 

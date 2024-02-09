@@ -1,11 +1,12 @@
+from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from bot import SolveBot
+support_router = Router()
 
 
-@SolveBot.router.message(Command('support'))
+@support_router.message(Command('support'))
 async def on_support_command(message: Message):
     builder = InlineKeyboardBuilder()
 

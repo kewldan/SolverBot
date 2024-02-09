@@ -10,7 +10,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
-import config
+import api
 
 
 class ProblemData(BaseModel):
@@ -54,8 +54,8 @@ async def get_test(hostname: str, test_id: str) -> TestData:
 async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
     async with aiohttp.ClientSession() as session:
         async with session.post(f'{hostname}/newapi/login', json={
-            "user": config.config['api']['username'],
-            "password": config.config['api']['password'],
+            "user": api.config.account.username,
+            "password": api.config.account.password,
             "guest": False
         }) as login_request:
             login = await login_request.json()
@@ -79,7 +79,8 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                             try:
                                 solution = {'text': prob_block.find_all('div', {'class': 'pbody'})[1].text,
                                             'images': [i['src'] for i in
-                                                       prob_block.find_all('div', {'class': 'pbody'})[1].find_all('img')]
+                                                       prob_block.find_all('div', {'class': 'pbody'})[1].find_all(
+                                                           'img')]
                                             }
                             except IndexError:
                                 pass
@@ -94,7 +95,8 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                             except AttributeError:
                                 pass
 
-                            messages.append(ProblemData(index=index, solution=solution["text"] if 'text' in solution else 'Нет решения', answer=answer,
+                            messages.append(ProblemData(index=index, solution=solution[
+                                "text"] if 'text' in solution else 'Нет решения', answer=answer,
                                                         problem_id=problem_id))
                             index += 1
                     return messages

@@ -3,10 +3,10 @@ import time
 
 import motor.motor_asyncio
 
-from config import config
+import api
 
-client = motor.motor_asyncio.AsyncIOMotorClient(config['bot']['mongo'])
-database = client[config['bot']['database']]
+client = motor.motor_asyncio.AsyncIOMotorClient(api.config.bot.mongo)
+database = client[api.config.bot.database]
 users = database['users']
 
 
