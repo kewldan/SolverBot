@@ -14,7 +14,7 @@ from db.types.user import User
 solve_router = Router()
 
 
-@solve_router.message(F.text, F.text == '🧠 Решить')
+@solve_router.message(F.text, F.text == '🚀 Решить')
 async def on_solve_button(message: Message):
     await message.answer('<b>🤔 Чтобы решить вариант, отправьте ссылку боту сообщением</b>\n'
                          '\n'
