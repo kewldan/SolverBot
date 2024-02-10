@@ -18,7 +18,9 @@ solve_router = Router()
 async def on_solve_button(message: Message):
     await message.answer('<b>🤔 Чтобы решить вариант, отправьте ссылку боту сообщением</b>\n'
                          '\n'
-                         'Например: https://oge.sdamgia.ru/test?id=54697659')
+                         'Например: https://oge.sdamgia.ru/test?id=54697659\n'
+                         '\n'
+                         'Теперь вы можете просто отправить номер варианта, например <code>54697659</code>, и потом выбрать платформу!')
 
 
 @solve_router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
