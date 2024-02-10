@@ -1,7 +1,7 @@
 pydantic
 motor>=3.3.2
+kwldn_bot>=1.0.4
 aiogram>=3.3.0
 aiofiles>=23.2.1
 aiohttp>=3.9.3
 beautifulsoup4>=4.12.3
-kwldn_bot
