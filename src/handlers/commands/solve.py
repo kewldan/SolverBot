@@ -2,7 +2,7 @@ import html
 from re import Match
 
 from aiogram import Router, F
-from aiogram.exceptions import AiogramError
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from kwldn_bot.utils import get_timestamp
@@ -116,5 +116,5 @@ async def on_solve_subject_message(query: CallbackQuery, match: Match[str], user
                                          f' решил свой {user.solved + 1} '
                                          f'<a href=\"{test_url}\">вариант</a> | '
                                          f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
-        except AiogramError:
+        except TelegramBadRequest:
             pass
