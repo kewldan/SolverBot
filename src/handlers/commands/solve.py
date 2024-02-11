@@ -104,13 +104,16 @@ async def on_solve_subject_message(query: CallbackQuery, match: Match[str], user
 
     await database.users.update_one({'id': user.id}, {'$inc': {'solved': 1}})
 
+    if query.from_user.username:
+        identity = html.escape(f'@{query.from_user.username}')
+    else:
+        identity = f'[<code>{query.from_user.id}</code>]'
+
     for owner in api.config.bot.owners:
         try:
             await query.bot.send_message(owner,
-                                         f'<a href=\"{query.from_user.url}\">Пользователь</a> '
-                                         f'(<code>{query.from_user.username}</code>) '
-                                         f'[<code>{query.from_user.id}</code>] '
-                                         f'решил свой {user.solved + 1} '
+                                         f'🔔 Пользователь {identity}'
+                                         f' решил свой {user.solved + 1} '
                                          f'<a href=\"{test_url}\">вариант</a> | '
                                          f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
         except AiogramError:

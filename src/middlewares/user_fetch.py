@@ -1,8 +1,11 @@
+import html
 from typing import Callable, Dict, Any, Awaitable
 
 from aiogram import BaseMiddleware
 from aiogram.types import Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+import api
 from db import database
 from db.types.user import User
 
@@ -18,5 +21,16 @@ class UserFetchMiddleware(BaseMiddleware):
                                             {'$set': {'username': event.from_user.username}})
 
         data['user'] = user
+
+        builder = InlineKeyboardBuilder()
+        if event.from_user.url:
+            builder.button(text='Открыть', url=event.from_user.url)
+        if event.from_user.username:
+            identity = html.escape(f'@{event.from_user.username}')
+        else:
+            identity = f'[<code>{event.from_user.id}</code>]'
+        for owner in api.config.bot.owners:
+            await event.bot.send_message(owner, f'🔔 Зарегистрирован новый пользователь - {identity}',
+                                         reply_markup=builder.as_markup())
 
         return await handler(event, data)

@@ -64,13 +64,16 @@ async def on_solve_url_message(message: Message, m: Match[str], user: User):
 
     await status_message.edit_text(f'✅ Вариант решен <code>{timestamp}</code>')
 
+    if message.from_user.username:
+        identity = html.escape(f'@{message.from_user.username}')
+    else:
+        identity = f'[<code>{message.from_user.id}</code>]'
+
     for owner in api.config.bot.owners:
         try:
             await message.bot.send_message(owner,
-                                           f'<a href=\"{message.from_user.url}\">Пользователь</a> '
-                                           f'(<code>{message.from_user.username}</code>) '
-                                           f'[<code>{message.from_user.id}</code>] '
-                                           f'решил свой {user.solved + 1} '
+                                           f'🔔 Пользователь {identity}'
+                                           f' решил свой {user.solved + 1} '
                                            f'<a href=\"{m.group(0)}\">вариант</a> | '
                                            f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>')
         except AiogramError:
