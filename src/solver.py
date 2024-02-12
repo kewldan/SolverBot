@@ -72,7 +72,12 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
 
                             prob_block = soup.find('div', {'class': 'prob_maindiv'})
                             if prob_block is None:
-                                return None
+                                messages.append(
+                                    ProblemData(index=index, solution=f'🔑 {hostname}/problem?id={problem_id}',
+                                                answer='🔒',
+                                                problem_id=problem_id))
+                                index += 1
+                                continue
 
                             solution, answer = {}, ''
 
