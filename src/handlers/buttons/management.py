@@ -13,6 +13,7 @@ async def on_management_button(message: Message):
 
     builder.button(text='📢 Рассылка', callback_data='distribute')
     builder.button(text='🧑‍🎓 Пользователи', callback_data='users')
+    builder.button(text='📈 График', callback_data='graph')
 
     builder.adjust(1, repeat=True)
 
