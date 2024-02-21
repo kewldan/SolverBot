@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from db.types.user import User
+from db.database import User
 from formater import send_solution
 
 solve_router = Router()

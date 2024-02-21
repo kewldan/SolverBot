@@ -3,7 +3,7 @@ from re import Match
 from aiogram import F, Router
 from aiogram.types import Message
 
-from db.types.user import User
+from db.database import User
 from formater import send_solution
 
 solve_router = Router()

@@ -1,9 +1,8 @@
 from typing import Union
 
 from aiogram import F, types, Router
-from kwldn_bot.utils import get_timestamp
 
-from db.types.user import User
+from db.database import User
 
 statistics_router = Router()
 
@@ -12,11 +11,13 @@ statistics_router = Router()
 @statistics_router.message(F.text == '📊 Статистика')
 async def on_statistics_callback(message: Union[types.Message, types.CallbackQuery], user: User):
     if type(message) is types.Message:
+        # noinspection PyTypeChecker
         func = message.answer
     else:
+        # noinspection PyTypeChecker
         func = message.message.edit_text
 
-    joined = get_timestamp(user.joined)
+    joined = user.joined.strftime('%H:%M:%S %d.%m.%Y')
 
     await func(
         text=f'Статистика @{user.username if user.username else "none"}\n'

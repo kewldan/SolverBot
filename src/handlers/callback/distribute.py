@@ -8,7 +8,7 @@ from kwldn_bot.modules.state_clear import get_state_clear_markup
 from kwldn_bot.utils import confirm_action
 
 import api
-from db import database
+from db.database import User
 
 distribute_router = Router()
 
@@ -20,10 +20,10 @@ class DistributeStates(StatesGroup):
 @distribute_router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(api.config.bot.owners))
 async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    max_count = await database.users.count_documents({})
+    max_count = await User.count()
 
     count = 0
-    async for user in database.users.find():
+    async for user in User.find():
         try:
             await query.bot.copy_message(user['id'], query.from_user.id, data['message'])
             count += 1
@@ -36,7 +36,7 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
 
 @distribute_router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(api.config.bot.owners))
 async def on_distribute_message(message: Message, state: FSMContext):
-    count = await database.users.count_documents({})
+    count = await User.count()
 
     await confirm_action(message, f'разослать это сообщение {count} пользователям', True, 'distribute_confirm')
 

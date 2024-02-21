@@ -18,8 +18,10 @@ async def on_management_button(message: Message):
     builder.adjust(1, repeat=True)
 
     if type(message) is Message:
+        # noinspection PyTypeChecker
         func = message.answer
     else:
+        # noinspection PyTypeChecker
         func = message.message.edit_text
 
     me = await message.bot.get_me()

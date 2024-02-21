@@ -5,8 +5,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 import api
 import assets
-from db.database import capture_referral
-from db.types.user import User
+from db.database import User
 
 start_router = Router()
 
@@ -29,7 +28,8 @@ async def on_start_command(message: Message, user: User):
     if not user.referral:
         arguments = message.text.split()[1:]
         if len(arguments) > 0:
-            await capture_referral(user.id, arguments[0])
+            user.referral = arguments[0]
+            await user.save()
 
     content = ('👋 Привет, это бот для решения вариантов с сайта Сдам ГИА,'
                'полностью бесплатный и без рекламы. Бот разрабатывается на некоммерческой '
@@ -37,7 +37,7 @@ async def on_start_command(message: Message, user: User):
                '\n'
                'Дорогие друзья! 🌟\n'
                'Сердечно поздравляю с превосходным достижением - '
-               'более 100 пользователей уже пользуются моим Telegram ботом! 🎉\n'
+               'более 200 пользователей уже пользуются моим Telegram ботом! 🎉\n'
                'Это невероятно важный момент для меня, и я хочу выразить '
                'огромную благодарность каждому из вас за вашу поддержку и доверие. 💖\n'
                'Ваша активность и отзывчивость вдохновляют меня на еще большие свершения! 🚀\n'

@@ -1,37 +1,35 @@
 import io
-import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, BufferedInputFile
 from matplotlib import pyplot as plt
 
 import api
-from db import database
+from db.database import User
 
 graph_router = Router()
 plt.style.use('dark_background')
 
 
 @graph_router.callback_query(F.data == 'graph', F.from_user.id.in_(api.config.bot.owners))
-async def graph(query: CallbackQuery):
-    users = [*map(lambda doc: doc['joined'], await (database.users.find().to_list(None)))]
-    unix = min(users)
+async def on_graph_callback(query: CallbackQuery):
+    users = [*map(lambda doc: doc.joined, await (User.find_all().to_list()))]
+    date = datetime.now() - timedelta(weeks=3)
 
     dates, values = [], []
 
-    while unix <= time.time():
-        date = datetime.fromtimestamp(unix)
+    while date <= datetime.now():
         dates.append(date)
-        values.append(len([x for x in users if x < unix]))
-        unix += 3600
+        values.append(len([x for x in users if x < date]))
+        date += timedelta(hours=1)
 
     fig, ax1 = plt.subplots()
 
     ax1.plot(dates, values, color='tab:green')
     ax1.set_xlabel('Дата')
     ax1.set_ylabel('Количество')
-    ax1.set_title(f'Пользователи на {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}')
+    ax1.set_title(f'Пользователи на {datetime.now().strftime('%H:%M:%S %d.%m.%Y')}')
     ax1.fill_between(dates, values)
     plt.gcf().autofmt_xdate()
     with io.BytesIO() as buf:

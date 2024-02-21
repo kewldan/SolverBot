@@ -7,8 +7,7 @@ from kwldn_bot.utils import get_timestamp
 
 import api
 import solver
-from db.database import database
-from db.types.user import User
+from db.database import User
 
 
 async def notify(bot: Bot, identity: str, owner: int, solved: int, test_url: str, timestamp: str, loaded: bool):
@@ -57,8 +56,10 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
     if len(response) > 0:
         await bot.send_message(from_user.id, response)
 
+    user.solved += 1
+
     tasks = [bot.send_message(from_user.id, answers_text),
-             database.users.update_one({'id': from_user.id}, {'$inc': {'solved': 1}}),
+             user.save(),
              bot.edit_message_text(f'✅ Вариант {"загружен" if test.loaded else "решен"} <code>{timestamp}</code>',
                                    from_user.id, loading.message_id)]
 

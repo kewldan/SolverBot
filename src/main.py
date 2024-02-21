@@ -2,11 +2,13 @@ import asyncio
 import logging
 
 from bot import bot
+from db.database import connect
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 async def main():
+    await connect()
     await bot.start()
 
 
