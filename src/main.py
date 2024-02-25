@@ -1,14 +1,17 @@
 import asyncio
 import logging
 
+from kwldn_bot.database import connect
+
+import api
 from bot import bot
-from db.database import connect
+from db.database import User
 
 logging.basicConfig(level=logging.DEBUG)
 
 
 async def main():
-    await connect()
+    await connect(api.config.bot.mongo, api.config.bot.database, [User])
     await bot.start()
 
 

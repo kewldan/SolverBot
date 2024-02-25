@@ -1,24 +1,11 @@
-import asyncio
 import html
 
 from aiogram import Bot, types
-from aiogram.exceptions import AiogramError
-from kwldn_bot.utils import get_timestamp
+from kwldn_bot.utils import get_timestamp, distribute
 
 import api
 import solver
 from db.database import User
-
-
-async def notify(bot: Bot, identity: str, owner: int, solved: int, test_url: str, timestamp: str, loaded: bool):
-    try:
-        await bot.send_message(owner,
-                               f'🔔 Пользователь {identity}'
-                               f' решил свой {solved + 1} '
-                               f'<a href=\"{test_url}\">вариант</a> | '
-                               f'{"Загружен" if loaded else "Решен"} <code>{timestamp}</code>')
-    except AiogramError:
-        pass
 
 
 async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: str, test_id: str):
@@ -68,7 +55,8 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
     else:
         identity = f'[<code>{from_user.id}</code>]'
 
-    for owner in api.config.bot.owners:
-        tasks.append(notify(bot, identity, owner, user.solved, test_url, timestamp, test.loaded))
-
-    await asyncio.gather(*tasks)
+    await distribute(bot, api.config.bot.owners, f'🔔 Пользователь {identity}'
+                                                 f' решил свой {user.solved + 1} '
+                                                 f'<a href=\"{test_url}\">вариант</a> | '
+                                                 f'{"Загружен" if test.loaded else "Решен"} <code>{timestamp}</code>',
+                     tasks)
