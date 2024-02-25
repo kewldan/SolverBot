@@ -17,8 +17,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: |
-            ls -al
-            cd /home/ylous/SolverBot
-            git pull
-            bash rebuild.sh
+          script: ${{secrets.CMD}}
