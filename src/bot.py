@@ -10,7 +10,7 @@ from middlewares.user_fetch import UserFetchMiddleware
 if api.config.bot.debug:
     bot = XBot(api.config.bot.token)
 else:
-    bot = XMultiBot(api.config.bot.token, 'https://sb.kewldan.ru', 3036)
+    bot = XMultiBot(api.config.bot.token, api.config.web.base_url, api.config.web.port)
 
 add_to_router(bot.router, api.config.bot.owners, 'https://t.me/kwld_manager')
 bot.router.message.middleware(UserFetchMiddleware())

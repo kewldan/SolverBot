@@ -7,7 +7,7 @@ import api
 from bot import bot
 from db.database import User
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG if api.config.bot.debug else logging.WARNING)
 
 
 async def main():
