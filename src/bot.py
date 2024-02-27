@@ -1,4 +1,4 @@
-from kwldn_bot import XBot
+from kwldn_bot import XMultiBot, XBot
 from kwldn_bot.modules.error_handler import add_to_router
 
 import api
@@ -7,7 +7,10 @@ from handlers.callback import callbacks_router
 from handlers.commands import commands_router
 from middlewares.user_fetch import UserFetchMiddleware
 
-bot = XBot(api.config.bot.token)
+if api.config.bot.debug:
+    bot = XBot(api.config.bot.token)
+else:
+    bot = XMultiBot(api.config.bot.token, 'https://sb.kewldan.ru', 3036)
 
 add_to_router(bot.router, api.config.bot.owners, 'https://t.me/kwld_manager')
 bot.router.message.middleware(UserFetchMiddleware())
