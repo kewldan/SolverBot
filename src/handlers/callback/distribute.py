@@ -25,7 +25,7 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
     count = 0
     async for user in User.find():
         try:
-            await query.bot.copy_message(user['id'], query.from_user.id, data['message'])
+            await query.bot.copy_message(user.user_id, query.from_user.id, data['message'])
             count += 1
         except TelegramAPIError:
             pass
