@@ -60,7 +60,7 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
         }) as login_request:
             login = await login_request.json()
             if login['status']:
-                async with session.get(f'{hostname}/test?id={test_id}') as task_request:
+                async with session.get(f'{hostname}/test?id={test_id}&print=true') as task_request:
                     text = await task_request.text()
                     matches = re.findall(r'comments(\d+)', text)
                     index = 1

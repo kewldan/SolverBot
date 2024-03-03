@@ -29,8 +29,7 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
             count += 1
         except TelegramAPIError:
             pass
-    await query.answer(f'Отправлено {count}/{max_count} пользователям', show_alert=True)
-    await query.message.delete()
+    await query.message.reply(f'✅ Отправлено {count}/{max_count} пользователям')
     await state.clear()
 
 
