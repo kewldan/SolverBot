@@ -10,11 +10,13 @@ from db.database import User
 
 async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: str, test_id: str):
     loading = await bot.send_message(from_user.id, '⏱️ Загрузка ответов...')
+    test = await solver.get_test(hostname, test_id)
+
+    if len(test.problems) == 0:
+        return await bot.send_message(from_user.id, '<b>🚨 Не удалось решить вариант. /start для информации</b>')
 
     test_url = f'{hostname}/test?id={test_id}'
-
     response = f'<b>💎 Ваш <a href=\"{test_url}\">вариант</a> [<code>{test_id}</code>] решён:</b>\n\n'
-    test = await solver.get_test(hostname, test_id)
     timestamp = get_timestamp(test.solved)
     answers_text = f'<b>🥰 Краткие ответы на <a href=\"{test_url}\">вариант</a>: </b>\n\n'
 
