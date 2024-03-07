@@ -3,11 +3,14 @@ import html
 from datetime import datetime
 from typing import Optional
 
+import pymongo
 from aiogram import types, Bot
 from aiogram.exceptions import AiogramError
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from beanie import Document
 from kwldn_bot.database import BaseUser
+from pymongo import IndexModel
 
 import api
 
@@ -23,6 +26,30 @@ async def notify(bot: Bot, owner: int, identity: str, markup: InlineKeyboardMark
 class User(BaseUser):
     solved: int = 0
     referral: Optional[str] = None
+
+class Problem(Document):
+    hostname: str
+    internal_id: str | None
+    problem_id: str
+    solution: str | None
+    answer: str | None
+
+    class Settings:
+        indexes = [
+            IndexModel(
+                [
+                    ("hostname", pymongo.ASCENDING),
+                    ("internal_id", pymongo.ASCENDING),
+
+                ]
+            ),
+            IndexModel(
+                [
+                    ("hostname", pymongo.ASCENDING),
+                    ("problem_id", pymongo.ASCENDING)
+                ]
+            )
+        ]
 
 
 async def get_user(bot: Bot, event_user: types.User) -> User:

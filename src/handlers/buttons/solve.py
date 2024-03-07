@@ -12,8 +12,6 @@ solve_router = Router()
 @solve_router.message(F.text, F.text == '🚀 Решить')
 async def on_solve_button(message: Message):
     await message.answer(
-        '<b>🚨 ВНИМАНИЕ, ДО КОНЦА МАРТА БОТ РАБОТАЕТ НЕ СТАБИЛЬНО. НЕКОТОРЫЕ ВАРИАНТЫ (ОСОБЕННО ЕГЭ) НЕ МОГУТ БЫТЬ РЕШЕНЫ!</b>\n'
-        '\n'
         '<b>🤔 Чтобы решить вариант, отправьте ссылку боту сообщением</b>\n'
         '\n'
         'Например: https://oge.sdamgia.ru/test?id=54697659\n'

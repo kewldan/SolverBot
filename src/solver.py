@@ -1,16 +1,17 @@
 import json
 import math
 import os
-import re
 import time
 from typing import Optional
 
 import aiofiles
 import aiohttp
+from aiohttp import ContentTypeError
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 
 import api
+from db.database import Problem
 
 
 class ProblemData(BaseModel):
@@ -58,50 +59,26 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
             "password": api.config.account.password,
             "guest": False
         }) as login_request:
-            login = await login_request.json()
+            try:
+                login = await login_request.json()
+            except ContentTypeError:
+                print(await login_request.text())
+                login = {'status': False}
             if login['status']:
-                async with session.get(f'{hostname}/test?id={test_id}&print=true') as task_request:
-                    text = await task_request.text()
-                    matches = re.findall(r'comments(\d+)', text)
-                    index = 1
+                async with session.get(f'{hostname}/test?id={test_id}') as task_request:
+                    test_soup = BeautifulSoup(await task_request.text(), 'html.parser')
+                    problems = test_soup.find_all('div', class_='prob_maindiv')
+
                     messages: list[ProblemData] = []
-
-                    for problem_id in matches:
-                        async with session.get(f'{hostname}/problem?id={problem_id}') as problem_request:
-                            soup = BeautifulSoup(await problem_request.text(), 'html.parser')
-
-                            prob_block = soup.find('div', {'class': 'prob_maindiv'})
-                            if prob_block is None:
-                                messages.append(
-                                    ProblemData(index=index, solution=f'🔑 {hostname}/problem?id={problem_id}',
-                                                answer='🔒',
-                                                problem_id=problem_id))
-                                index += 1
-                                continue
-
-                            solution, answer = {}, ''
-
-                            try:
-                                solution = {'text': prob_block.find_all('div', {'class': 'pbody'})[1].text,
-                                            'images': [i['src'] for i in
-                                                       prob_block.find_all('div', {'class': 'pbody'})[1].find_all(
-                                                           'img')]
-                                            }
-                            except IndexError:
-                                pass
-                            except AttributeError:
-                                pass
-
-                            try:
-                                answer = prob_block.find(
-                                    'div', {'class': 'answer'}).text.replace('Ответ: ', '')
-                            except IndexError:
-                                pass
-                            except AttributeError:
-                                pass
-
-                            messages.append(ProblemData(index=index, solution=solution[
-                                "text"] if 'text' in solution else 'Нет решения', answer=answer,
-                                                        problem_id=problem_id))
-                            index += 1
+                    for problem_element in problems:
+                        problem_int_id = problem_element.attrs['data-id']
+                        index = problem_element.attrs['data-num']
+                        problem = await Problem.find_one(Problem.internal_id == problem_int_id)
+                        if problem:
+                            messages.append(ProblemData(index=index, solution=problem.solution or 'Нет решения',
+                                                        answer=problem.answer,
+                                                        problem_id=problem.problem_id))
+                        else:
+                            messages.append(ProblemData(index=index, solution='Нет в базе', answer='нет',
+                                                        problem_id=0))
                     return messages

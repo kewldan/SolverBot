@@ -5,13 +5,13 @@ from kwldn_bot.database import connect
 
 import api
 from bot import bot
-from db.database import User
+from db.database import User, Problem
 
 logging.basicConfig(level=logging.DEBUG if api.config.bot.debug else logging.WARNING)
 
 
 async def main():
-    await connect(api.config.bot.mongo, api.config.bot.database, [User])
+    await connect(api.config.bot.mongo, api.config.bot.database, [User, Problem])
     await bot.start()
 
 
