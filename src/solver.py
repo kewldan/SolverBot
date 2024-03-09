@@ -73,7 +73,10 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                     for problem_element in problems:
                         problem_int_id = problem_element.attrs['data-id']
                         index = problem_element.attrs['data-num']
-                        problem = await Problem.find_one(Problem.internal_id == problem_int_id)
+                        problem = await Problem.find_one(
+                            Problem.internal_id == problem_int_id, Problem.hostname == hostname.removeprefix(
+                                'https://').removesuffix('.sdamgia.ru'))
+                        print(problem_int_id, problem)
                         if problem:
                             messages.append(ProblemData(index=index, solution=problem.solution or 'Нет решения',
                                                         answer=problem.answer or 'Нет ответа',
