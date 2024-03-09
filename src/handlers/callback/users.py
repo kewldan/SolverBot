@@ -3,13 +3,13 @@ import html
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
-import api
-from db.database import User
+from config import config
+from database import User
 
 users_router = Router()
 
 
-@users_router.callback_query(F.data == 'users', F.from_user.id.in_(api.config.bot.owners))
+@users_router.callback_query(F.data == 'users', F.from_user.id.in_(config.bot.owners))
 async def on_distribute_callback(query: CallbackQuery):
     users_response = ''
     first = True
@@ -21,7 +21,7 @@ async def on_distribute_callback(query: CallbackQuery):
             identity = html.escape(f'@{user.username}')
         else:
             identity = f'<code>{user.user_id}</code>'
-        users_response += f'{i}. {identity} - {user.solved}\n'
+        users_response += f'{i}. {identity} - {user.timestamp}\n'
         i += 1
         if len(users_response) > 3900:
             if first:

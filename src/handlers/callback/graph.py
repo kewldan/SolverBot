@@ -5,14 +5,14 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, BufferedInputFile
 from matplotlib import pyplot as plt
 
-import api
-from db.database import User
+from config import config
+from database import User
 
 graph_router = Router()
 plt.style.use('dark_background')
 
 
-@graph_router.callback_query(F.data == 'graph', F.from_user.id.in_(api.config.bot.owners))
+@graph_router.callback_query(F.data == 'graph', F.from_user.id.in_(config.bot.owners))
 async def on_graph_callback(query: CallbackQuery):
     users = [*map(lambda doc: doc.joined, await (User.find_all().to_list()))]
     date = datetime.now() - timedelta(weeks=3)

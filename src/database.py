@@ -10,9 +10,8 @@ from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from beanie import Document
 from kwldn_bot.database import BaseUser
-from pymongo import IndexModel
 
-import api
+from config import config
 
 
 async def notify(bot: Bot, owner: int, identity: str, markup: InlineKeyboardMarkup):
@@ -27,6 +26,22 @@ class User(BaseUser):
     solved: int = 0
     referral: Optional[str] = None
 
+
+class Test(Document):
+    timestamp: datetime
+    hostname: str
+    test_id: str
+    problems: list[str]
+
+    class Settings:
+        indexes = [
+            pymongo.IndexModel([
+                ('hostname', pymongo.ASCENDING),
+                ('test_id', pymongo.ASCENDING)
+            ])
+        ]
+
+
 class Problem(Document):
     hostname: str
     internal_id: str | None
@@ -36,14 +51,13 @@ class Problem(Document):
 
     class Settings:
         indexes = [
-            IndexModel(
+            pymongo.IndexModel(
                 [
                     ("hostname", pymongo.ASCENDING),
                     ("internal_id", pymongo.ASCENDING),
-
                 ]
             ),
-            IndexModel(
+            pymongo.IndexModel(
                 [
                     ("hostname", pymongo.ASCENDING),
                     ("problem_id", pymongo.ASCENDING)
@@ -65,7 +79,7 @@ async def get_user(bot: Bot, event_user: types.User) -> User:
         else:
             identity = f'[<code>{event_user.id}</code>]'
         tasks = []
-        for owner in api.config.bot.owners:
+        for owner in config.bot.owners:
             tasks.append(notify(bot, owner, identity, builder.as_markup()))
         await asyncio.gather(*tasks)
     if user.username != event_user.username:

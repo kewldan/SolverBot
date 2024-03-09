@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from db.database import User
+from database import User
 from formater import send_solution
 
 solve_router = Router()
@@ -59,6 +59,6 @@ async def on_solve_subject_message(query: CallbackQuery, match: Match[str], user
     platform = match.group(2)
     number = match.group(3)
 
-    hostname = f'https://{subject}-{platform}.sdamgia.ru'
+    hostname = f'{subject}-{platform}'
 
     await send_solution(query.bot, query.from_user, user, hostname, number)

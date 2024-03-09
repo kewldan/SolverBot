@@ -2,7 +2,7 @@ from typing import Union
 
 from aiogram import F, types, Router
 
-from db.database import User
+from database import User
 
 statistics_router = Router()
 

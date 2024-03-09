@@ -3,9 +3,9 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-import api
 import assets
-from db.database import User
+from config import config
+from database import User
 
 start_router = Router()
 
@@ -15,7 +15,7 @@ def get_keyboard(user_id: int):
 
     builder.button(text='🚀 Решить')
     builder.button(text='📊 Статистика')
-    if user_id in api.config.bot.owners:
+    if user_id in config.bot.owners:
         builder.button(text='💻 Администрирование')
 
     builder.adjust(2, 1)
@@ -32,7 +32,9 @@ async def on_start_command(message: Message, user: User):
             await user.save()
 
     content = (
-        '⛔️ Бот работает только для ОГЭ и некоторых предметов ЕГЭ, ВПР временно не доступен. Все платформы будут поддерживатся до конца недели\n\n'
+        '⛔️ Лит, ист, хим, био, гео ЕГЭ недоступны и весь ВПР недоступен для решения.\n'
+        'Завтра будут доступны все предметы ✌️\n'
+        '\n'
         '👋 Привет, это бот для решения вариантов с сайта Сдам ГИА,'
         'полностью бесплатный и без рекламы. Бот разрабатывается на некоммерческой '
         'основе.\n'

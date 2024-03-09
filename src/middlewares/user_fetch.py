@@ -3,7 +3,7 @@ from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import Message
 
-from db.database import get_user
+from database import get_user
 
 
 class UserFetchMiddleware(BaseMiddleware):

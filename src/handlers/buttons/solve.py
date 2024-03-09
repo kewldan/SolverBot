@@ -3,7 +3,7 @@ from re import Match
 from aiogram import F, Router
 from aiogram.types import Message
 
-from db.database import User
+from database import User
 from formater import send_solution
 
 solve_router = Router()
@@ -20,7 +20,7 @@ async def on_solve_button(message: Message):
         'и потом выбрать платформу!')
 
 
-@solve_router.message(F.text, F.text.regexp(r'^(https://[a-z\-]+\.sdamgia\.ru)/test\?id=(\d+)$').as_('m'))
+@solve_router.message(F.text, F.text.regexp(r'^https://([a-z\-]+)\.sdamgia\.ru/test\?id=(\d+)$').as_('m'))
 async def on_solve_url_message(message: Message, m: Match[str], user: User):
     hostname = m.group(1)
     test_id = m.group(2)

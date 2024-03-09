@@ -2,12 +2,12 @@ from aiogram import F, Router
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import api
+from config import config
 
 management_router = Router()
 
 
-@management_router.message(F.text, F.text == '💻 Администрирование', F.from_user.id.in_(api.config.bot.owners))
+@management_router.message(F.text, F.text == '💻 Администрирование', F.from_user.id.in_(config.bot.owners))
 async def on_management_button(message: Message):
     builder = InlineKeyboardBuilder()
 
@@ -28,5 +28,5 @@ async def on_management_button(message: Message):
 
     await func(
         text=f'<b>Администрирование @{me.username}</b>' + (
-            '\n\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if api.config.bot.debug else ''),
+            '\n\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if config.bot.debug else ''),
         reply_markup=builder.as_markup())

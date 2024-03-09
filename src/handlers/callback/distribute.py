@@ -7,8 +7,8 @@ from aiogram.types import CallbackQuery, Message
 from kwldn_bot.modules.state_clear import get_state_clear_markup
 from kwldn_bot.utils import confirm_action
 
-import api
-from db.database import User
+from config import config
+from database import User
 
 distribute_router = Router()
 
@@ -17,7 +17,7 @@ class DistributeStates(StatesGroup):
     message = State()
 
 
-@distribute_router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(api.config.bot.owners))
+@distribute_router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(config.bot.owners))
 async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     max_count = await User.count()
@@ -33,7 +33,7 @@ async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext
     await state.clear()
 
 
-@distribute_router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(api.config.bot.owners))
+@distribute_router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(config.bot.owners))
 async def on_distribute_message(message: Message, state: FSMContext):
     count = await User.count()
 
