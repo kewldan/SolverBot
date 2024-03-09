@@ -76,7 +76,7 @@ async def solve(hostname: str, test_id: str) -> Optional[list[ProblemData]]:
                         problem = await Problem.find_one(Problem.internal_id == problem_int_id)
                         if problem:
                             messages.append(ProblemData(index=index, solution=problem.solution or 'Нет решения',
-                                                        answer=problem.answer,
+                                                        answer=problem.answer or 'Нет ответа',
                                                         problem_id=problem.problem_id))
                         else:
                             messages.append(ProblemData(index=index, solution='Нет в базе', answer='нет',
