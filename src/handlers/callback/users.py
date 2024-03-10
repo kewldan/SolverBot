@@ -1,3 +1,4 @@
+import datetime
 import html
 
 from aiogram import F, Router
@@ -21,7 +22,7 @@ async def on_distribute_callback(query: CallbackQuery):
             identity = html.escape(f'@{user.username}')
         else:
             identity = f'<code>{user.user_id}</code>'
-        users_response += f'{i}. {identity} - {user.timestamp}\n'
+        users_response += f'{i}. {identity}\n'
         i += 1
         if len(users_response) > 3900:
             if first:
