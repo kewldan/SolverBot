@@ -2,15 +2,17 @@ import re
 from datetime import datetime
 
 import aiohttp
-from aiohttp import ContentTypeError
+from aiohttp import ContentTypeError, ClientSession
 from bs4 import BeautifulSoup
+from kwldn_bot.utils import distribute
 from pydantic import BaseModel
 
+import bot
 from config import config
 from database import Problem, Test
 from utils import get_url
 
-BODY_PATTERN = re.compile(r'body(\d+)')
+body_pattern = re.compile(r'body(\d+)')
 
 
 class ProblemData(BaseModel):
@@ -18,6 +20,32 @@ class ProblemData(BaseModel):
     problem_id: str
     solution: str
     answer: str
+
+
+headers = {
+    'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'X-Kl-Ajax-Request': 'Ajax_Request'
+}
+
+
+async def authenticate(session: ClientSession, hostname: str) -> bool:
+    async with session.post(f'{get_url(hostname)}/newapi/login', json={
+        "user": config.account.username,
+        "password": config.account.password,
+        "guest": False
+    }, headers={**headers, 'Referer': get_url(hostname)}) as login_request:
+        try:
+            login = await login_request.json()
+            return login['status']
+        except ContentTypeError:
+            await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
+            return False
 
 
 async def get_problem(hostname: str, index: int, internal_id: str):
@@ -43,34 +71,29 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
             index += 1
         loaded = True
     else:
+        problems: list[ProblemData] = []
         async with aiohttp.ClientSession() as session:
-            async with session.post(f'{get_url(hostname)}/newapi/login', json={
-                "user": config.account.username,
-                "password": config.account.password,
-                "guest": False
-            }) as login_request:
-                try:
-                    login = await login_request.json()
-                except ContentTypeError:
-                    print(await login_request.text())
-                    login = {'status': False}
-                problems: list[ProblemData] = []
-                if login['status']:
-                    async with session.get(f'{get_url(hostname)}/test?id={test_id}') as task_request:
-                        test_soup = BeautifulSoup(await task_request.text(), 'html.parser')
-                        blocks = test_soup.find_all('div', class_='prob_maindiv')
+            await authenticate(session, hostname)
+            async with session.get(f'{get_url(hostname)}/test?id={test_id}',
+                                   headers={**headers, 'Referer': get_url(hostname)}) as task_request:
+                text = await task_request.text()
+                test_soup = BeautifulSoup(text, 'html.parser')
+                blocks = test_soup.find_all('div', class_='prob_maindiv')
 
-                        internal_ids = []
-                        index = 1
-                        for problem_element in blocks:
-                            problem_int_id = BODY_PATTERN.match(
-                                problem_element.find('div', id=BODY_PATTERN).attrs['id']).group(1)
+                internal_ids = []
+                index = 1
+                for problem_element in blocks:
+                    problem_int_id = body_pattern.match(
+                        problem_element.find('div', id=body_pattern).attrs['id']).group(1)
 
-                            problems.append(await get_problem(hostname, index, problem_int_id))
-                            internal_ids.append(problem_int_id)
-                            index += 1
-                        test = Test(hostname=hostname, problems=internal_ids, test_id=test_id, timestamp=datetime.now(),
-                                    used_id=user_id)
-                        await test.insert()
+                    problems.append(await get_problem(hostname, index, problem_int_id))
+                    internal_ids.append(problem_int_id)
+                    index += 1
+
+                test = Test(hostname=hostname, problems=internal_ids, test_id=test_id,
+                            timestamp=datetime.now(),
+                            used_id=user_id)
+                if len(internal_ids) > 0:
+                    await test.insert()
         loaded = False
     return test, problems, loaded

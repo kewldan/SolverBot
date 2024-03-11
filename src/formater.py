@@ -13,8 +13,15 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
     loading = await bot.send_message(from_user.id, '⏱️ Загрузка ответов...')
     test, problems, loaded = await solver.get_problems_data(from_user.id, hostname, test_id)
 
+    if from_user.username:
+        identity = html.escape(f'@{from_user.username}')
+    else:
+        identity = f'[<code>{from_user.id}</code>]'
+
     if len(problems) == 0:
-        await distribute(bot, config.bot.owners, '<a href="https://"></a>')
+        await loading.delete()
+        await distribute(bot, config.bot.owners,
+                         f'🚨 {identity} пытался решить <a href="{get_url(hostname)}/test?id={test_id}">вариант</a> с 0 заданий')
         return await bot.send_message(from_user.id,
                                       '<b>🚨 Не удалось решить вариант. Обратитесь в поддержку, указав вариант</b>')
 
@@ -52,11 +59,6 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
              user.save(),
              bot.edit_message_text(f'✅ Вариант {"загружен" if loaded else "решен"} <code>{timestamp}</code>',
                                    from_user.id, loading.message_id)]
-
-    if from_user.username:
-        identity = html.escape(f'@{from_user.username}')
-    else:
-        identity = f'[<code>{from_user.id}</code>]'
 
     solved = await Test.find(Test.user_id == from_user.id).count()
 
