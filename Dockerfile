@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./assets ./assets
 COPY ./src ./src
 
+ENV TZ="Europe/Moscow"
 ENV PYTHONPATH=/usr/app/src
 
 CMD [ "python", "src/main.py" ]
