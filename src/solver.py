@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from config import config
 from database import Problem, Test
+from utils import get_url
 
 BODY_PATTERN = re.compile(r'body(\d+)')
 
@@ -31,7 +32,7 @@ async def get_problem(hostname: str, index: int, internal_id: str):
                            problem_id=internal_id)
 
 
-async def get_problems_data(hostname: str, test_id: str) -> tuple[Test, list[ProblemData], bool]:
+async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[Test, list[ProblemData], bool]:
     test = await Test.find_one(Test.hostname == hostname, Test.test_id == test_id)
 
     if test:
@@ -43,7 +44,7 @@ async def get_problems_data(hostname: str, test_id: str) -> tuple[Test, list[Pro
         loaded = True
     else:
         async with aiohttp.ClientSession() as session:
-            async with session.post(f'https://{hostname}.sdamgia.ru/newapi/login', json={
+            async with session.post(f'{get_url(hostname)}/newapi/login', json={
                 "user": config.account.username,
                 "password": config.account.password,
                 "guest": False
@@ -55,7 +56,7 @@ async def get_problems_data(hostname: str, test_id: str) -> tuple[Test, list[Pro
                     login = {'status': False}
                 problems: list[ProblemData] = []
                 if login['status']:
-                    async with session.get(f'https://{hostname}.sdamgia.ru/test?id={test_id}') as task_request:
+                    async with session.get(f'{get_url(hostname)}/test?id={test_id}') as task_request:
                         test_soup = BeautifulSoup(await task_request.text(), 'html.parser')
                         blocks = test_soup.find_all('div', class_='prob_maindiv')
 
@@ -68,7 +69,8 @@ async def get_problems_data(hostname: str, test_id: str) -> tuple[Test, list[Pro
                             problems.append(await get_problem(hostname, index, problem_int_id))
                             internal_ids.append(problem_int_id)
                             index += 1
-                        test = Test(hostname=hostname, problems=internal_ids, test_id=test_id, timestamp=datetime.now())
+                        test = Test(hostname=hostname, problems=internal_ids, test_id=test_id, timestamp=datetime.now(),
+                                    used_id=user_id)
                         await test.insert()
         loaded = False
     return test, problems, loaded

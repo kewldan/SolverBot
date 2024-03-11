@@ -5,18 +5,20 @@ from kwldn_bot.utils import distribute
 
 import solver
 from config import config
-from database import User
+from database import User, Test
+from utils import get_url
 
 
 async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: str, test_id: str):
     loading = await bot.send_message(from_user.id, '⏱️ Загрузка ответов...')
-    test, problems, loaded = await solver.get_problems_data(hostname, test_id)
+    test, problems, loaded = await solver.get_problems_data(from_user.id, hostname, test_id)
 
     if len(problems) == 0:
+        await distribute(bot, config.bot.owners, '<a href="https://"></a>')
         return await bot.send_message(from_user.id,
                                       '<b>🚨 Не удалось решить вариант. Обратитесь в поддержку, указав вариант</b>')
 
-    url = f'https://{hostname}.sdamgia.ru'
+    url = get_url(hostname)
     test_url = f'{url}/test?id={test_id}'
     response = f'<b>💎 Ваш <a href=\"{test_url}\">вариант</a> [<code>{test_id}</code>] решён:</b>\n\n'
     timestamp = test.timestamp.strftime('%H:%M:%S %d.%m.%Y')
@@ -46,8 +48,6 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
     if len(response) > 0:
         await bot.send_message(from_user.id, response)
 
-    user.solved += 1
-
     tasks = [bot.send_message(from_user.id, answers_text),
              user.save(),
              bot.edit_message_text(f'✅ Вариант {"загружен" if loaded else "решен"} <code>{timestamp}</code>',
@@ -58,8 +58,9 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
     else:
         identity = f'[<code>{from_user.id}</code>]'
 
+    solved = await Test.find(Test.user_id == from_user.id).count()
+
     await distribute(bot, config.bot.owners, f'🔔 Пользователь {identity}'
-                                             f' решил свой {user.solved} '
-                                             f'<a href=\"{test_url}\">вариант</a> | '
-                                             f'{"Загружен" if loaded else "Решен"} <code>{timestamp}</code>',
+                                             f' решил свой {solved} '
+                                             f'<a href=\"{test_url}\">вариант</a>',
                      tasks)

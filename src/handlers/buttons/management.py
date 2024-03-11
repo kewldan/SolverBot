@@ -3,6 +3,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import config
+from database import User
 
 management_router = Router()
 
@@ -26,7 +27,14 @@ async def on_management_button(message: Message):
 
     me = await message.bot.get_me()
 
+    users = await User.count()
+    blocked = await User.find(User.blocked == True).count()
+
     await func(
-        text=f'<b>Администрирование @{me.username}</b>' + (
-            '\n\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if config.bot.debug else ''),
+        text=f'<b>Администрирование @{me.username}</b>\n'
+             '\n'
+             f'Пользователей: {users}\n'
+             f'Заблокированные: {blocked} ({round(blocked / users * 100, 1)}%)\n'
+             + (
+                 '\n⚠️ <b>ВКЛЮЧЕН ТЕСТОВЫЙ РЕЖИМ</b> ⚠️' if config.bot.debug else ''),
         reply_markup=builder.as_markup())

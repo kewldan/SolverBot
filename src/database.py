@@ -23,13 +23,14 @@ async def notify(bot: Bot, owner: int, identity: str, markup: InlineKeyboardMark
 
 
 class User(BaseUser):
-    solved: int = 0
+    blocked: bool = False
     referral: Optional[str] = None
 
 
 class Test(Document):
     timestamp: datetime
     hostname: str
+    user_id: int | None = None
     test_id: str
     problems: list[str]
 

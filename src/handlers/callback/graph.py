@@ -15,7 +15,7 @@ plt.style.use('dark_background')
 @graph_router.callback_query(F.data == 'graph', F.from_user.id.in_(config.bot.owners))
 async def on_graph_callback(query: CallbackQuery):
     users = [*map(lambda doc: doc.joined, await (User.find_all().to_list()))]
-    date = datetime.now() - timedelta(weeks=3)
+    date = datetime.now() - timedelta(weeks=4)
 
     dates, values = [], []
 

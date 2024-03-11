@@ -20,22 +20,23 @@ class DistributeStates(StatesGroup):
 @distribute_router.callback_query(F.data == 'distribute_confirm', F.from_user.id.in_(config.bot.owners))
 async def on_distribute_confirm_callback(query: CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    max_count = await User.count()
+    users = await User.find(User.blocked == False).to_list()
 
     count = 0
-    async for user in User.find():
+    for user in users:
         try:
             await query.bot.copy_message(user.user_id, query.from_user.id, data['message'])
             count += 1
         except TelegramAPIError:
-            pass
-    await query.message.reply(f'✅ Отправлено {count}/{max_count} пользователям')
+            user.blocked = True
+            await user.save()
+    await query.message.reply(f'✅ Отправлено {count}/{len(users)} пользователям')
     await state.clear()
 
 
 @distribute_router.message(StateFilter(DistributeStates.message), F.from_user.id.in_(config.bot.owners))
 async def on_distribute_message(message: Message, state: FSMContext):
-    count = await User.count()
+    count = await User.find(User.blocked == False).count()
 
     await confirm_action(message, f'разослать это сообщение {count} пользователям', True, 'distribute_confirm')
 
