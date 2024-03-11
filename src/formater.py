@@ -61,6 +61,6 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
     solved = await Test.find(Test.user_id == from_user.id).count()
 
     await distribute(bot, config.bot.owners, f'🔔 Пользователь {identity}'
-                                             f' решил свой {solved} '
-                                             f'<a href=\"{test_url}\">вариант</a>',
+                                             f' решил свой {solved}'
+                                             f'<a href=\"{test_url}\">вариант</a> c {len(problems)} заданиями',
                      tasks)
