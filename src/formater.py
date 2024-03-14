@@ -35,7 +35,7 @@ async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: s
         await distribute(bot, config.bot.owners,
                          f'🚨 {identity} пытался решить <a href="{get_url(hostname)}/test?id={test_id}">вариант</a> с 0 заданий')
         return await bot.send_message(from_user.id,
-                                      '<b>🚨 Не удалось решить вариант. Обратитесь в поддержку, указав вариант</b>')
+                                      '<b>🚨 Не удалось решить вариант. Обратитесь в поддержку, указав вариант. Попробуйте /bypass</b>')
 
     url = get_url(hostname)
     test_url = f'{url}/test?id={test_id}'
