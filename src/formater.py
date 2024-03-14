@@ -1,3 +1,4 @@
+import datetime
 import html
 
 from aiogram import Bot, types
@@ -9,9 +10,20 @@ from database import User, Test
 from utils import get_url
 
 
-async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: str, test_id: str):
+async def send_solution(bot: Bot, from_user: types.User, user: User, hostname: str, test_id: str,
+                        internal_ids: list[str] | None = None):
     loading = await bot.send_message(from_user.id, '⏱️ Загрузка ответов...')
-    test, problems, loaded = await solver.get_problems_data(from_user.id, hostname, test_id)
+    if internal_ids is None:
+        test, problems, loaded = await solver.get_problems_data(from_user.id, hostname, test_id)
+    else:
+        test = Test(timestamp=datetime.datetime.now(), hostname=hostname, user_id=from_user.id, test_id=test_id,
+                    problems=internal_ids)
+        loaded = True
+        problems = []
+        index = 1
+        for internal_id in internal_ids:
+            problems.append(await solver.get_problem(hostname, index, internal_id))
+            index += 1
 
     if from_user.username:
         identity = html.escape(f'@{from_user.username}')

@@ -6,7 +6,4 @@ from handlers.callback.graph import graph_router
 from handlers.callback.users import users_router
 
 callbacks_router = Router()
-callbacks_router.include_router(distribute_router)
-callbacks_router.include_router(state_clear_router)
-callbacks_router.include_router(users_router)
-callbacks_router.include_router(graph_router)
+callbacks_router.include_routers(distribute_router, state_clear_router, users_router, graph_router)
