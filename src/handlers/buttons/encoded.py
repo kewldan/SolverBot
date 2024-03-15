@@ -1,9 +1,11 @@
+import datetime
 import re
 
 from aiogram import Router, F
 from aiogram.types import Message
 
-from database import User
+import config
+from database import User, Test
 from formater import send_solution
 
 encoded_router = Router()
@@ -19,5 +21,10 @@ async def on_encoded_message(message: Message, match: re.Match[str], user: User)
         encoded = [str(int(x, 16)) for x in (match.group(3).split(','))]
     except Exception:
         return await message.reply('❌ Неверная сигнатура')
+
+    if message.from_user.id in config.config.bot.owners:
+        test = Test(timestamp=datetime.datetime.now(), problems=encoded, hostname=hostname, test_id=test_id,
+                    user_id=message.from_user.id)
+        await test.insert()
 
     await send_solution(message.bot, message.from_user, user, hostname, test_id, encoded)
