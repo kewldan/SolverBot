@@ -11,7 +11,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from beanie import Document
 from kwldn_bot.database import BaseUser
 
-from config import config
+from config import config, AccountData
 
 
 async def notify(bot: Bot, owner: int, identity: str, markup: InlineKeyboardMarkup):
@@ -25,6 +25,7 @@ async def notify(bot: Bot, owner: int, identity: str, markup: InlineKeyboardMark
 class User(BaseUser):
     blocked: bool = False
     referral: Optional[str] = None
+    account: AccountData | None = None
 
 
 class Test(Document):
