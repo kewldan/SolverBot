@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import datetime
 
@@ -22,7 +23,7 @@ class ProblemData(BaseModel):
     answer: str
 
 
-headers = {
+login_request_headers = {
     'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
     'Sec-Ch-Ua-Mobile': '?0',
     'Sec-Ch-Ua-Platform': '"Windows"',
@@ -33,17 +34,39 @@ headers = {
     'X-Kl-Ajax-Request': 'Ajax_Request'
 }
 
+test_request_headers = {
+    'Dnt': '1',
+    'Pragma': 'no-cache',
+    'Priority': 'u=0, i',
+    'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    'Sec-Ch-Ua-Arch': '"x86"',
+    'Sec-Ch-Ua-Bitness': '"64"',
+    'Sec-Ch-Ua-Full-Version': '"124.0.6356.6"',
+    'Sec-Ch-Ua-Full-Version-List': '"Chromium";v="124.0.6356.6", "Google Chrome";v="124.0.6356.6", "Not-A.Brand";v="99.0.0.0"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Model': '""',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'Sec-Ch-Ua-Platform-Version': '"15.0.0"',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'same-origin',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+}
+
 
 async def authenticate(session: ClientSession, hostname: str) -> bool:
     async with session.post(f'{get_url(hostname)}/newapi/login', json={
         "user": config.account.username,
         "password": config.account.password,
         "guest": False
-    }, headers={**headers, 'Referer': get_url(hostname)}) as login_request:
+    }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
         try:
             login = await login_request.json()
             return login['status']
         except ContentTypeError:
+            logging.warning('Login request returned: ' + await login_request.text())
             await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
             return False
 
@@ -75,7 +98,7 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
         async with aiohttp.ClientSession() as session:
             await authenticate(session, hostname)
             async with session.get(f'{get_url(hostname)}/test?id={test_id}',
-                                   headers={**headers, 'Referer': get_url(hostname)}) as task_request:
+                                   headers={**test_request_headers, 'Referer': get_url(hostname)}) as task_request:
                 text = await task_request.text()
                 test_soup = BeautifulSoup(text, 'html.parser')
                 blocks = test_soup.find_all('div', class_='prob_maindiv')
@@ -92,7 +115,7 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
 
                 test = Test(hostname=hostname, problems=internal_ids, test_id=test_id,
                             timestamp=datetime.now(),
-                            used_id=user_id)
+                            user_id=user_id)
                 if len(internal_ids) > 0:
                     await test.insert()
         loaded = False
