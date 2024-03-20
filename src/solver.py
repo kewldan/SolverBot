@@ -55,7 +55,7 @@ test_request_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 }
 
-proxy = 'http://185.147.131.236:9091@WerVxC:ZFjx4n'
+proxy = 'http://WerVxC:ZFjx4n@185.147.131.236:9091'
 
 async def authenticate(session: ClientSession, hostname: str) -> bool:
     async with session.post(f'{get_url(hostname)}/newapi/login', proxy=proxy, json={
