@@ -14,8 +14,11 @@ CMD [ "python", "src/main.py" ]
 
 RUN apt-get update && apt-get install -y openconnect
 
-CMD [ "sudo apt update" ]
-CMD [ "sudo apt install network-manager-sstp" ]
-CMD [ "nmcli connection add type vpn ifname '*' con-name 'aboba' vpn-type sstp" ]
-CMD [ "nmcli connection modify 'aboba' vpn.data 'gateway=lolkof.keenetic.pro user=ylous password=lovevalorant123'" ]
-CMD [ "nmcli connection up 'aboba'" ]
+RUN apt-get update && apt-get install -y \
+    sstp-client \
+    iproute2 \
+    iputils-ping
+
+COPY sstp.conf /etc/sstp.conf
+
+CMD ["sstpc", "--nolaunchpppd", "--log-stderr", "--log-level", "4", "--cert-warn", "--ipparam", "sstp", "--config", "/etc/sstp.conf"]
