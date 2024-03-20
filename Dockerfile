@@ -14,7 +14,7 @@ CMD [ "python", "src/main.py" ]
 
 RUN #apt-get update && apt-get install -y openconnect
 
-RUN sudo apt install network-manager-sstp
+RUN apt install network-manager-sstp
 RUN nmcli connection add type vpn ifname '*' con-name 'aboba' vpn-type sstp
 RUN nmcli connection modify 'aboba' vpn.data 'gateway=lolkof.keenetic.pro user=ylous password=lovevalorant123'
 RUN nmcli connection up 'aboba'
