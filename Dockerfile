@@ -12,6 +12,8 @@ ENV PYTHONPATH=/usr/app/src
 
 CMD [ "python", "src/main.py" ]
 
+RUN apt-get update && apt-get install -y openconnect
+
 CMD [ "sudo apt update" ]
 CMD [ "sudo apt install network-manager-sstp" ]
 CMD [ "nmcli connection add type vpn ifname '*' con-name 'aboba' vpn-type sstp" ]
