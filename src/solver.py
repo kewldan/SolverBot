@@ -78,6 +78,7 @@ async def authenticate(session: ClientSession, hostname: str) -> bool:
             return False
         
 async def registrate(session: ClientSession, hostname: str) -> bool:
+    print('reg')
     async with session.post(f'{get_url(hostname)}/newapi/register', proxy=random.choice(proxy_file).strip(), json={
         'birthdate':"123-123-123",
         'name':"AutoSolver",
@@ -120,7 +121,7 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
     else:
         problems: list[ProblemData] = []
         async with aiohttp.ClientSession() as session:
-            await authenticate(session, hostname)
+            await registrate(session, hostname)
             async with session.get(f'{get_url(hostname)}/test?id={test_id}', proxy=random.choice(proxy_file).strip(),
                                    headers={**test_request_headers, 'Referer': get_url(hostname)}) as task_request:
                 text = await task_request.text()
