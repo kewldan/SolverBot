@@ -64,7 +64,7 @@ except:
     proxy_file = ['']
 
 async def authenticate(session: ClientSession, hostname: str) -> bool:
-    async with session.post(f'{get_url(hostname)}/newapi/login', proxy=random.choice(proxy_file), json={
+    async with session.post(f'{get_url(hostname)}/newapi/login', proxy=random.choice(proxy_file).strip(), json={
         "user": config.account.username,
         "password": config.account.password,
         "guest": False
@@ -104,7 +104,7 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
         problems: list[ProblemData] = []
         async with aiohttp.ClientSession() as session:
             await authenticate(session, hostname)
-            async with session.get(f'{get_url(hostname)}/test?id={test_id}', proxy=random.choice(proxy_file),
+            async with session.get(f'{get_url(hostname)}/test?id={test_id}', proxy=random.choice(proxy_file).strip(),
                                    headers={**test_request_headers, 'Referer': get_url(hostname)}) as task_request:
                 text = await task_request.text()
                 test_soup = BeautifulSoup(text, 'html.parser')
