@@ -13,7 +13,7 @@ from config import config
 from database import Problem, Test
 from utils import get_url
 
-import random
+import random, string
 
 body_pattern = re.compile(r'body(\d+)')
 
@@ -68,6 +68,23 @@ async def authenticate(session: ClientSession, hostname: str) -> bool:
         "user": config.account.username,
         "password": config.account.password,
         "guest": False
+    }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
+        try:
+            login = await login_request.json()
+            return login['status']
+        except ContentTypeError:
+            logging.warning('Login request returned: ' + await login_request.text())
+            await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
+            return False
+        
+async def registrate(session: ClientSession, hostname: str) -> bool:
+    async with session.post(f'{get_url(hostname)}/newapi/register', proxy=random.choice(proxy_file).strip(), json={
+        'birthdate':"123-123-123",
+        'name':"AutoSolver",
+        'password':"IfUDontHashItUrVeryStupidButITrustUAboutHashingPassword",
+        'sname':"DevelopByLazyStudent",
+        "status": 'student',
+        "username": f'{"".join([random.choice(string.ascii_lowercase) for _ in range(15)]).title()}@domen2ndlvl.domen1stlvl'
     }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
         try:
             login = await login_request.json()
