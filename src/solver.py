@@ -13,6 +13,8 @@ from config import config
 from database import Problem, Test
 from utils import get_url
 
+import random, string
+
 body_pattern = re.compile(r'body(\d+)')
 
 
@@ -55,13 +57,39 @@ test_request_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 }
 
-proxy = 'http://WerVxC:ZFjx4n@185.147.131.236:9091'
+try:
+    with open('data/proxy.txt', mode='r', encoding='utf-8') as f:
+        proxy_file = f.readlines()
+except:
+    proxy_file = ['']
 
 async def authenticate(session: ClientSession, hostname: str) -> bool:
-    async with session.post(f'{get_url(hostname)}/newapi/login', proxy=proxy, json={
+    async with session.post(f'{get_url(hostname)}/newapi/login', proxy=random.choice(proxy_file).strip(), json={
         "user": config.account.username,
         "password": config.account.password,
         "guest": False
+    }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
+        try:
+            login = await login_request.json()
+            return login['status']
+        except ContentTypeError:
+            logging.warning('Login request returned: ' + await login_request.text())
+            await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
+            return False
+        
+async def registrate(session: ClientSession, hostname: str) -> bool:
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(f'{get_url(hostname)}/register')
+    print('reg')
+    async with session.post(f'{get_url(hostname)}/newapi/register', proxy=random.choice(proxy_file).strip(), json={
+        'birthdate':"123-123-123",
+        'name':"AutoSolver",
+        'password':"IfUDontHashItUrVeryStupidButITrustUAboutHashingPassword",
+        'sname':"DevelopByLazyStudent",
+        "status": 'student',
+        "username": f'{"".join([random.choice(string.ascii_lowercase) for _ in range(35)]).title()}@domen2ndlvl.domen1stlvl'
     }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
         try:
             login = await login_request.json()
@@ -98,7 +126,7 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
         problems: list[ProblemData] = []
         async with aiohttp.ClientSession() as session:
             await authenticate(session, hostname)
-            async with session.get(f'{get_url(hostname)}/test?id={test_id}', proxy=proxy,
+            async with session.get(f'{get_url(hostname)}/test?id={test_id}', proxy=random.choice(proxy_file).strip(),
                                    headers={**test_request_headers, 'Referer': get_url(hostname)}) as task_request:
                 text = await task_request.text()
                 test_soup = BeautifulSoup(text, 'html.parser')

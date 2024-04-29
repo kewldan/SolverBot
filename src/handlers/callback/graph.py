@@ -29,7 +29,7 @@ async def on_graph_callback(query: CallbackQuery):
     ax1.plot(dates, values, color='tab:green')
     ax1.set_xlabel('Дата')
     ax1.set_ylabel('Количество')
-    ax1.set_title(f'Пользователи на {datetime.now().strftime('%H:%M:%S %d.%m.%Y')}')
+    ax1.set_title(f'Пользователи на {datetime.now().strftime("%H:%M:%S %d.%m.%Y")}')
     ax1.fill_between(dates, values)
     plt.gcf().autofmt_xdate()
     with io.BytesIO() as buf:
