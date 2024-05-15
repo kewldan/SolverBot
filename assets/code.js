@@ -1,1 +1,1 @@
-(() => 'SLVR:' + location.search + ':' + location.hostname + ':' + Array.prototype.map.call(document.getElementsByClassName('prob_view'), (e) => parseInt(e.querySelectorAll('[id^=body]')[0].id.replace('body', '')).toString(16)).join(','))()
+(() => 'SLVR:' + location.search + ':' + location.hostname + ':' + Array.prototype.map.call(document.getElementsByClassName('prob_maindiv'), (e) => parseInt(e.querySelectorAll('[id^=body]')[0].id.replace('body', '')).toString(16)).join(','))()

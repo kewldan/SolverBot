@@ -11,7 +11,7 @@ class PauseMiddleware(BaseMiddleware):
 
     async def __call__(self, handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]], event: Message,
                        data: Dict[str, Any]) -> Any:
-        if event.from_user.id not in config.bot.owners:
+        if str(event.from_user.id) not in config.bot.owners:
             return await event.answer('''Добрый день, в связи с последней блокировкой и окончанием учебного года, то было принято решение приостановить работу бота. Вам следует готовится к экзаменам без помощи бота, они уже совсем скоро 😔
 
 О боте узнала администрация Сдам ГИА. Извините, что возможно доставил вам неудобства. Я просто не хотел делать свое ДЗ, а также хотел помочь другим. У меня не было и мысли о таком охвате

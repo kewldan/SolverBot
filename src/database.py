@@ -69,9 +69,9 @@ class Problem(Document):
 
 
 async def get_user(bot: Bot, event_user: types.User) -> User:
-    user = await User.find_one(User.user_id == event_user.id)
+    user = await User.find_one(User.user_id == str(event_user.id))
     if not user:
-        user = User(user_id=event_user.id, username=event_user.username, joined=datetime.now())
+        user = User(user_id=str(event_user.id), username=event_user.username, joined=datetime.now())
         await user.insert()
         builder = InlineKeyboardBuilder()
         if event_user.url:

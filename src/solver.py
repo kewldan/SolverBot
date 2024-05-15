@@ -2,9 +2,8 @@ import logging
 import re
 from datetime import datetime
 
-import aiohttp
-from aiohttp import ContentTypeError, ClientSession
 from bs4 import BeautifulSoup
+from curl_cffi.requests import AsyncSession
 from kwldn_bot.utils import distribute
 from pydantic import BaseModel
 
@@ -12,8 +11,6 @@ import bot
 from config import config
 from database import Problem, Test
 from utils import get_url
-
-import random, string
 
 body_pattern = re.compile(r'body(\d+)')
 
@@ -26,6 +23,7 @@ class ProblemData(BaseModel):
 
 
 login_request_headers = {
+    'Accept-Encoding': 'gzip, deflate',
     'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
     'Sec-Ch-Ua-Mobile': '?0',
     'Sec-Ch-Ua-Platform': '"Windows"',
@@ -37,6 +35,7 @@ login_request_headers = {
 }
 
 test_request_headers = {
+    'Accept-Encoding': 'gzip, deflate',
     'Dnt': '1',
     'Pragma': 'no-cache',
     'Priority': 'u=0, i',
@@ -57,47 +56,20 @@ test_request_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 }
 
-try:
-    with open('data/proxy.txt', mode='r', encoding='utf-8') as f:
-        proxy_file = f.readlines()
-except:
-    proxy_file = ['']
 
-async def authenticate(session: ClientSession, hostname: str) -> bool:
-    async with session.post(f'{get_url(hostname)}/newapi/login', proxy=random.choice(proxy_file).strip(), json={
+async def authenticate(session: AsyncSession, hostname: str) -> bool:
+    login_request = await session.request('POST', f'{get_url(hostname)}/newapi/login', impersonate='chrome', json={
         "user": config.account.username,
         "password": config.account.password,
         "guest": False
-    }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
-        try:
-            login = await login_request.json()
-            return login['status']
-        except ContentTypeError:
-            logging.warning('Login request returned: ' + await login_request.text())
-            await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
-            return False
-        
-async def registrate(session: ClientSession, hostname: str) -> bool:
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(f'{get_url(hostname)}/register')
-    print('reg')
-    async with session.post(f'{get_url(hostname)}/newapi/register', proxy=random.choice(proxy_file).strip(), json={
-        'birthdate':"123-123-123",
-        'name':"AutoSolver",
-        'password':"IfUDontHashItUrVeryStupidButITrustUAboutHashingPassword",
-        'sname':"DevelopByLazyStudent",
-        "status": 'student',
-        "username": f'{"".join([random.choice(string.ascii_lowercase) for _ in range(35)]).title()}@domen2ndlvl.domen1stlvl'
-    }, headers={**login_request_headers, 'Referer': get_url(hostname)}) as login_request:
-        try:
-            login = await login_request.json()
-            return login['status']
-        except ContentTypeError:
-            logging.warning('Login request returned: ' + await login_request.text())
-            await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
-            return False
+    }, headers={**login_request_headers}, referer=get_url(hostname))
+
+    try:
+        return login_request.json()['status']
+    except Exception:
+        logging.warning('Login request returned: ' + await login_request.text())
+        await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
+        return False
 
 
 async def get_problem(hostname: str, index: int, internal_id: str):
@@ -124,12 +96,12 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
         loaded = True
     else:
         problems: list[ProblemData] = []
-        async with aiohttp.ClientSession() as session:
-            await authenticate(session, hostname)
-            async with session.get(f'{get_url(hostname)}/test?id={test_id}', proxy=random.choice(proxy_file).strip(),
-                                   headers={**test_request_headers, 'Referer': get_url(hostname)}) as task_request:
-                text = await task_request.text()
-                test_soup = BeautifulSoup(text, 'html.parser')
+        async with AsyncSession() as session:
+            if await authenticate(session, hostname):
+                task_request = await session.request('GET', f'{get_url(hostname)}/test?id={test_id}',
+                                                     impersonate='chrome',
+                                                     headers={**test_request_headers}, referer=get_url(hostname))
+                test_soup = BeautifulSoup(task_request.text, 'html.parser')
                 blocks = test_soup.find_all('div', class_='prob_maindiv')
 
                 internal_ids = []

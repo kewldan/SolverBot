@@ -2,11 +2,8 @@ from kwldn_bot import XMultiBot, XBot
 from kwldn_bot.modules.error_handler import add_to_router
 
 from config import config
-from handlers.buttons import buttons_router
-from handlers.callback import callbacks_router
-from handlers.commands import commands_router
-from middlewares.pause import PauseMiddleware
-from middlewares.user_fetch import UserFetchMiddleware
+from handlers import commands_router, callbacks_router, buttons_router
+from middlewares import PauseMiddleware, UserFetchMiddleware
 
 if config.bot.debug:
     bot = XBot(config.bot.token)
@@ -19,6 +16,4 @@ bot.router.callback_query.middleware(PauseMiddleware())
 bot.router.message.middleware(UserFetchMiddleware())
 bot.router.callback_query.middleware(UserFetchMiddleware())
 
-bot.router.include_router(commands_router)
-bot.router.include_router(callbacks_router)
-bot.router.include_router(buttons_router)
+bot.router.include_routers(commands_router, callbacks_router, buttons_router)

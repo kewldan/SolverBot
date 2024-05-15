@@ -21,7 +21,7 @@ def get_keyboard(user_id: int):
 
     builder.button(text='🚀 Решить')
     builder.button(text='📊 Статистика')
-    if user_id in config.bot.owners:
+    if str(user_id) in config.bot.owners:
         builder.button(text='💻 Администрирование')
 
     builder.adjust(2, 1)
