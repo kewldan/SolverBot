@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from asyncio import WindowsSelectorEventLoopPolicy
+import platform
 
 from kwldn_bot.database import connect
 
@@ -17,7 +17,9 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+    if platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
