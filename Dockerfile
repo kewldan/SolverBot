@@ -10,4 +10,6 @@ COPY ./src ./src
 ENV TZ="Europe/Moscow"
 ENV PYTHONPATH=/usr/app/src
 
+EXPOSE 80
+
 CMD [ "python", "src/main.py" ]
