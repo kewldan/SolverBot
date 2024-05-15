@@ -66,8 +66,9 @@ async def authenticate(session: AsyncSession, hostname: str) -> bool:
 
     try:
         return login_request.json()['status']
-    except Exception:
-        logging.warning('Login request returned: ' + await login_request.text())
+    except Exception as e:
+        logging.warning('Login request returned: ' + login_request.text)
+        logging.exception(e)
         await distribute(bot.bot.main_bot, config.bot.owners, '🚨 Ошибка авторизации')
         return False
 
