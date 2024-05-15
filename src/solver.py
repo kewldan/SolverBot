@@ -58,11 +58,12 @@ test_request_headers = {
 
 
 async def authenticate(session: AsyncSession, hostname: str) -> bool:
-    login_request = await session.request('POST', f'{get_url(hostname)}/newapi/login', impersonate='chrome', json={
-        "user": config.account.username,
-        "password": config.account.password,
-        "guest": False
-    }, headers={**login_request_headers}, referer=get_url(hostname))
+    login_request = await session.request('POST', f'{get_url(hostname)}/newapi/login', impersonate='chrome',
+                                          proxy='http://6NeZMV:iSxcP9mEj0@109.248.15.19:5500', json={
+            "user": config.account.username,
+            "password": config.account.password,
+            "guest": False
+        }, headers={**login_request_headers}, referer=get_url(hostname))
 
     try:
         return login_request.json()['status']
@@ -100,6 +101,7 @@ async def get_problems_data(user_id: int, hostname: str, test_id: str) -> tuple[
         async with AsyncSession() as session:
             if await authenticate(session, hostname):
                 task_request = await session.request('GET', f'{get_url(hostname)}/test?id={test_id}',
+                                                     proxy='http://6NeZMV:iSxcP9mEj0@109.248.15.19:5500',
                                                      impersonate='chrome',
                                                      headers={**test_request_headers}, referer=get_url(hostname))
                 test_soup = BeautifulSoup(task_request.text, 'html.parser')
